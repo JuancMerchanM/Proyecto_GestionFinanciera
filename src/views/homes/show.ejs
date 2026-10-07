@@ -1,0 +1,65 @@
+<section class="page-head">
+  <h1><%= home.name %></h1>
+  <div class="page-head__actions">
+    <a class="btn btn--primary" href="/homes/<%= home.id %>/dashboard">Dashboard</a>
+    <a class="btn btn--ghost" href="/homes/<%= home.id %>/transactions">Movimientos</a>
+    <a class="btn btn--ghost" href="/homes/<%= home.id %>/budgets">Presupuestos</a>
+    <a class="btn btn--ghost" href="/homes/<%= home.id %>/accounts">Cuentas</a>
+    <a class="btn btn--ghost" href="/homes/<%= home.id %>/categories">Categorías</a>
+    <span class="badge"><%= home.currency %></span>
+    <span class="badge badge--role"><%= home.role %></span>
+  </div>
+</section>
+
+<div class="card">
+  <h2>Miembros <span class="muted">(<%= members.length %>)</span></h2>
+  <ul class="member-list">
+    <% members.forEach(m => { %>
+      <li class="member-list__item">
+        <span class="avatar"><%= m.name.charAt(0).toUpperCase() %></span>
+        <span class="member-list__name">
+          <%= m.name %>
+          <% if (m.userId === currentUser.id) { %><span class="muted">(tú)</span><% } %>
+        </span>
+        <span class="muted member-list__email"><%= m.email %></span>
+        <span class="badge <%= m.role === 'admin' ? 'badge--admin' : '' %>"><%= m.role %></span>
+      </li>
+    <% }) %>
+  </ul>
+</div>
+
+<% if (home.role === 'admin') { %>
+  <div class="card">
+    <h2>Invitaciones</h2>
+    <p class="muted">Genera un código y compártelo manualmente (link o texto) con la persona a invitar.</p>
+
+    <form method="POST" action="/homes/<%= home.id %>/invites" class="invite-form">
+      <div class="form-row">
+        <label>
+          Rol
+          <select class="form-control" name="role">
+            <option value="member">member</option>
+            <option value="admin">admin</option>
+          </select>
+        </label>
+        <label>
+          Email destino (opcional)
+          <input class="form-control" type="email" name="email" placeholder="solo ese email puede aceptar">
+        </label>
+      </div>
+      <button class="btn btn--primary" type="submit">Generar código</button>
+    </form>
+
+    <% if (invites.length > 0) { %>
+      <h3>Pendientes</h3>
+      <ul class="invite-list">
+        <% invites.forEach(inv => { %>
+          <li>
+            <code class="code"><%= inv.code %></code>
+            <span class="muted">→ <%= inviteUrl(inv.code) %> · rol <%= inv.role %><%= inv.email ? ' · ' + inv.email : '' %> · vence <%= new Date(inv.expiresAt).toLocaleDateString('es-CO') %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+<% } %>

@@ -1,0 +1,48 @@
+<section class="page-head">
+  <h1><%= budget ? 'Editar' : 'Nuevo' %> presupuesto</h1>
+  <a class="btn btn--ghost" href="/homes/<%= home.id %>/budgets">Volver</a>
+</section>
+
+<div class="card auth__card" style="margin: 0 auto;">
+  <% if (error) { %><div class="flash flash--error" role="alert"><%= error %></div><% } %>
+
+  <form method="POST"
+        action="<%= budget ? `/homes/${home.id}/budgets/${budget.id}` : `/homes/${home.id}/budgets` %>"
+        data-validate="required" novalidate>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="month">Mes</label>
+        <input class="form-control" type="month" id="month" name="month" required
+               value="<%= values.month %>">
+        <p class="field-error" hidden></p>
+      </div>
+      <div class="form-group">
+        <label for="categoryId">Categoría de gasto</label>
+        <select class="form-control" id="categoryId" name="categoryId" required>
+          <option value="">Seleccione…</option>
+          <% categories.forEach(c => { %>
+            <option value="<%= c.id %>" <%= values.categoryId === c.id ? 'selected' : '' %>>
+              <%= c.name %>
+            </option>
+          <% }) %>
+        </select>
+        <p class="form-hint">Solo categorías de gasto; un presupuesto por categoría y mes.</p>
+        <p class="field-error" hidden></p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="limitDecimal">Límite mensual (<%= home.currency %><%= home.currency === 'COP' ? ' sin decimales' : '' %>)</label>
+      <input class="form-control" type="number" id="limitDecimal" name="limitDecimal" required
+             min="1" step="<%= home.currency === 'USD' ? '0.01' : '1' %>" inputmode="decimal"
+             value="<%= values.limitDecimal %>" placeholder="300000">
+      <p class="form-hint">Ej: 300000 → <%= formatMoney(300000, home.currency) %>. Se guarda como entero.</p>
+      <p class="field-error" hidden></p>
+    </div>
+
+    <button class="btn btn--primary btn--block" type="submit">
+      <%= budget ? 'Guardar cambios' : 'Crear presupuesto' %>
+    </button>
+  </form>
+</div>

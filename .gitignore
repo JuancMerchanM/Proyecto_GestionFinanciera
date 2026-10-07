@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+.DS_Store
+.data/
+all-files.txt
+run-me
+*.txt

@@ -1,0 +1,45 @@
+<section class="page-head">
+  <h1><%= category ? 'Editar' : 'Nueva' %> categoría</h1>
+  <a class="btn btn--ghost" href="/homes/<%= home.id %>/categories">Volver</a>
+</section>
+
+<div class="card auth__card" style="margin: 0 auto;">
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="flash flash--error" role="alert"><%= error %></div>
+  <% } %>
+
+  <%
+    const f = (typeof form !== 'undefined' && form) ? form : (category || {});
+    const selected = (v) => (f.type === v ? 'selected' : '');
+  %>
+
+  <form method="POST"
+        action="<%= category ? `/homes/${home.id}/categories/${category.id}` : `/homes/${home.id}/categories` %>"
+        data-validate="category" novalidate>
+    <div class="form-group">
+      <label for="name">Nombre</label>
+      <input class="form-control" type="text" id="name" name="name" required minlength="2" maxlength="40"
+             value="<%= f.name ?? '' %>" placeholder="Mascotas">
+      <p class="field-error" hidden></p>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="color">Color</label>
+        <input class="form-control" type="color" id="color" name="color"
+               value="<%= f.color && /^#[0-9a-fA-F]{6}$/.test(f.color) ? f.color : '#67718a' %>" style="max-width:70px;padding:4px">
+      </div>
+      <div class="form-group">
+        <label for="type">Tipo</label>
+        <select class="form-control" id="type" name="type" required>
+          <option value="expense" <%= selected('expense') %>>Gasto</option>
+          <option value="income" <%= selected('income') %>>Ingreso</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn--primary btn--block" type="submit">
+      <%= category ? 'Guardar cambios' : 'Crear categoría' %>
+    </button>
+  </form>
+</div>

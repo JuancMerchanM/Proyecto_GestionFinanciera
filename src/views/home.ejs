@@ -1,0 +1,17 @@
+<section class="hero">
+  <h1>Tu hogar, bajo control</h1>
+  <p class="hero__subtitle">
+    Registra ingresos y gastos, define presupuestos mensuales y visualiza en qué se va el dinero.
+  </p>
+  <% if (!currentUser) { %>
+    <div class="hero__actions">
+      <a class="btn btn--primary" href="/register">Crear cuenta</a>
+      <a class="btn btn--ghost" href="/login">Iniciar sesión</a>
+    </div>
+  <% } %>
+  <ul class="features">
+    <li>Multi-usuario dentro de un mismo hogar</li>
+    <li>Cuentas, categorías y presupuestos por mes</li>
+    <li>Dashboard con gráfico de gastos por categoría</li>
+  </ul>
+</section>

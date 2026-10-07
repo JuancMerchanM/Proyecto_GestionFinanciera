@@ -1,0 +1,22 @@
+<header class="topbar">
+  <div class="container topbar__inner">
+    <a class="brand" href="/">💰 Finanzas del Hogar</a>
+    <nav class="nav" aria-label="Principal">
+      <% if (currentUser) { %>
+        <span class="nav__user"><%= currentUser.name %></span>
+        <% if (currentHomeId) { %>
+          <a href="/homes/<%= currentHomeId %>" class="nav__link">Mi hogar</a>
+        <% } else { %>
+          <a href="/homes" class="nav__link">Mis hogares</a>
+        <% } %>
+        <form method="POST" action="/logout" class="nav__form">
+          <button class="nav__link nav__button" type="submit">Cerrar sesión</button>
+        </form>
+      <% } else { %>
+        <a href="/login" class="nav__link">Iniciar sesión</a>
+        <a href="/register" class="nav__link nav__link--accent">Registrarse</a>
+      <% } %>
+      <a href="/api-docs" class="nav__link">API</a>
+    </nav>
+  </div>
+</header>

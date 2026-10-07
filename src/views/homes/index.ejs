@@ -1,0 +1,19 @@
+<section class="page-head">
+  <h1>Mis hogares</h1>
+  <a class="btn btn--primary" href="/homes/new">Crear hogar</a>
+</section>
+
+<% if (homes.length === 0) { %>
+  <div class="card">
+    <p>Todavía no perteneces a ningún hogar. Crea uno o acepta una invitación con código.</p>
+  </div>
+<% } else { %>
+  <div class="grid">
+    <% homes.forEach(h => { %>
+      <a class="card card--link" href="/homes/<%= h.id %>">
+        <h3><%= h.name %></h3>
+        <p class="muted">Moneda: <%= h.currency %> · <%= h.membersCount %> miembro(s) · Rol: <%= h.role %></p>
+      </a>
+    <% }) %>
+  </div>
+<% } %>

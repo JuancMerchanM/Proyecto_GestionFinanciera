@@ -1,0 +1,79 @@
+<section class="page-head">
+  <h1><%= tx ? 'Editar' : 'Nueva' %> transacción</h1>
+  <a class="btn btn--ghost" href="/homes/<%= home.id %>/transactions">Volver</a>
+</section>
+
+<div class="card auth__card" style="margin: 0 auto;">
+  <% if (error) { %><div class="flash flash--error" role="alert"><%= error %></div><% } %>
+
+  <form method="POST"
+        action="<%= tx ? `/homes/${home.id}/transactions/${tx.id}` : `/homes/${home.id}/transactions` %>"
+        data-validate="tx" data-filter-categories novalidate>
+
+    <fieldset class="form-group">
+      <legend class="form-label">Tipo</legend>
+      <label class="radio">
+        <input type="radio" name="type" value="expense" required <%= values.type === 'expense' ? 'checked' : '' %>>
+        Gasto
+      </label>
+      <label class="radio">
+        <input type="radio" name="type" value="income" <%= values.type === 'income' ? 'checked' : '' %>>
+        Ingreso
+      </label>
+    </fieldset>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="amountDecimal">Monto (<%= home.currency %><%= home.currency === 'COP' ? ' sin decimales' : '' %>)</label>
+        <input class="form-control" type="number" id="amountDecimal" name="amountDecimal" required
+               min="0" step="<%= home.currency === 'USD' ? '0.01' : '1' %>" inputmode="decimal"
+               value="<%= values.amountDecimal %>" placeholder="50000">
+        <p class="form-hint">Ej: 50000 → <%= formatMoney(50000, home.currency) %>. Se guarda como entero.</p>
+        <p class="field-error" hidden></p>
+      </div>
+      <div class="form-group">
+        <label for="date">Fecha</label>
+        <input class="form-control" type="date" id="date" name="date" required value="<%= values.date %>">
+        <p class="field-error" hidden></p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="accountId">Cuenta</label>
+        <select class="form-control" id="accountId" name="accountId" required>
+          <option value="">Seleccione…</option>
+          <% accounts.forEach(a => { %>
+            <option value="<%= a.id %>" <%= values.accountId === a.id ? 'selected' : '' %>>
+              <%= a.name %> (<%= a.typeLabel %>)
+            </option>
+          <% }) %>
+        </select>
+        <p class="field-error" hidden></p>
+      </div>
+      <div class="form-group">
+        <label for="categoryId">Categoría</label>
+        <select class="form-control" id="categoryId" name="categoryId" required>
+          <option value="">Seleccione…</option>
+          <% categories.forEach(c => { %>
+            <option value="<%= c.id %>" data-type="<%= c.type %>" <%= values.categoryId === c.id ? 'selected' : '' %>>
+              <%= c.name %>
+            </option>
+          <% }) %>
+        </select>
+        <p class="form-hint">Se filtran según el tipo seleccionado.</p>
+        <p class="field-error" hidden></p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="note">Nota (opcional)</label>
+      <input class="form-control" type="text" id="note" name="note" maxlength="200"
+             value="<%= values.note ?? '' %>" placeholder="Almuerzo del domingo…">
+    </div>
+
+    <button class="btn btn--primary btn--block" type="submit">
+      <%= tx ? 'Guardar cambios' : 'Registrar movimiento' %>
+    </button>
+  </form>
+</div>

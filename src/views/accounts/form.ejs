@@ -1,0 +1,58 @@
+<section class="page-head">
+  <h1><%= account ? 'Editar' : 'Nueva' %> cuenta</h1>
+  <a class="btn btn--ghost" href="/homes/<%= home.id %>/accounts">Volver</a>
+</section>
+
+<div class="card auth__card" style="margin: 0 auto;">
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="flash flash--error" role="alert"><%= error %></div>
+  <% } %>
+
+  <%
+    const f = (typeof form !== 'undefined' && form) ? form : (account || {});
+    const sel = (v) => (f.type === v ? 'selected' : '');
+    const cur = home.currency;
+    const decimals = cur === 'USD' ? 2 : 0;
+    const openingDecimal = f.openingBalanceMinor != null ? (f.openingBalanceMinor / 10 ** decimals).toFixed(decimals) : (0).toFixed(decimals);
+  %>
+
+  <form method="POST"
+        action="<%= account ? `/homes/${home.id}/accounts/${account.id}` : `/homes/${home.id}/accounts` %>"
+        data-validate="account" novalidate>
+    <div class="form-group">
+      <label for="name">Nombre</label>
+      <input class="form-control" type="text" id="name" name="name" required minlength="2" maxlength="40"
+             value="<%= f.name ?? '' %>" placeholder="Efectivo, Davivienda…">
+      <p class="field-error" hidden></p>
+    </div>
+
+    <div class="form-group">
+      <label for="type">Tipo</label>
+      <select class="form-control" id="type" name="type" required>
+        <option value="cash" <%= sel('cash') %>>Efectivo</option>
+        <option value="bank" <%= sel('bank') %>>Banco</option>
+        <option value="card" <%= sel('card') %>>Tarjeta</option>
+        <option value="savings" <%= sel('savings') %>>Ahorro</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="opening">Saldo inicial (<%= cur %><%= decimals === 0 ? ' — sin decimales' : '' %>)</label>
+      <input class="form-control" type="number" id="opening" name="openingBalanceDecimal"
+             step="<%= decimals === 2 ? '0.01' : '1' %>" inputmode="decimal"
+             value="<%= openingDecimal %>">
+      <p class="form-hint">
+        Ej: 50000 → <%= formatMoney(50000, cur) %> · se guarda como entero en unidad mínima.
+      </p>
+      <p class="field-error" hidden></p>
+    </div>
+
+    <% if (account) { %>
+      <p class="muted">Saldo actual: <strong><%= formatMoney(account.balanceMinor ?? 0, account.currency) %></strong></p>
+    <% } %>
+
+    <button class="btn btn--primary btn--block" type="submit">
+      <%= account ? 'Guardar cambios' : 'Crear cuenta' %>
+    </button>
+  </form>
+</div>

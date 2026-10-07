@@ -1,0 +1,109 @@
+<section class="page-head">
+  <h1><%= home.name %> · Movimientos</h1>
+  <div class="page-head__actions">
+    <a class="btn btn--ghost" href="/homes/<%= home.id %>">Volver</a>
+    <a class="btn btn--primary" href="/homes/<%= home.id %>/transactions/new">Nuevo movimiento</a>
+  </div>
+</section>
+
+<% if (success) { %><div class="flash flash--success" role="status"><%= success %></div><% } %>
+<% if (error) { %><div class="flash flash--error" role="alert"><%= error %></div><% } %>
+
+<form class="filters-bar" method="GET" action="/homes/<%= home.id %>/transactions">
+  <label>Desde
+    <input class="form-control" type="date" name="from" value="<%= filters.from %>">
+  </label>
+  <label>Hasta
+    <input class="form-control" type="date" name="to" value="<%= filters.to %>">
+  </label>
+  <label>Tipo
+    <select class="form-control" name="type">
+      <option value="" <%= !filters.type ? 'selected' : '' %>>Todos</option>
+      <option value="expense" <%= filters.type === 'expense' ? 'selected' : '' %>>Gastos</option>
+      <option value="income" <%= filters.type === 'income' ? 'selected' : '' %>>Ingresos</option>
+    </select>
+  </label>
+  <label>Categoría
+    <select class="form-control" name="categoryId">
+      <option value="">Todas</option>
+      <% categories.forEach(c => { %>
+        <option value="<%= c.id %>" <%= filters.categoryId === c.id ? 'selected' : '' %>>
+          <%= c.name %>
+        </option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Cuenta
+    <select class="form-control" name="accountId">
+      <option value="">Todas</option>
+      <% accounts.forEach(a => { %>
+        <option value="<%= a.id %>" <%= filters.accountId === a.id ? 'selected' : '' %>><%= a.name %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label class="radio radio--inline">
+    <input type="checkbox" name="mine" value="true" <%= filters.mine ? 'checked' : '' %>> Solo míos
+  </label>
+  <div class="filters-bar__actions">
+    <button class="btn btn--primary btn--sm" type="submit">Aplicar</button>
+    <a class="btn btn--ghost btn--sm" href="/homes/<%= home.id %>/transactions">Limpiar</a>
+  </div>
+</form>
+
+<p class="muted"><%= meta.total %> movimiento(s) · página <%= meta.page %> de <%= meta.totalPages %></p>
+
+<% if (data.length === 0) { %>
+  <div class="card"><p class="muted">No hay movimientos con estos filtros.</p></div>
+<% } else { %>
+  <ul class="tx-list">
+    <% data.forEach(tx => { %>
+      <li class="tx-row">
+        <div class="tx-row__main">
+          <span class="tx-row__title"><%= tx.category ? tx.category.name : '(sin categoría)' %></span>
+          <span class="tx-row__meta">
+            <%= tx.date %> · <%= tx.account ? tx.account.name : '?' %> · <%= tx.user ? tx.user.name : '—' %>
+            <% if (tx.note) { %> · <%= tx.note %><% } %>
+          </span>
+        </div>
+        <span class="tx-row__amount <%= tx.type === 'income' ? 'is-income' : 'is-expense' %>">
+          <%= tx.type === 'income' ? '+' : '−' %><%= formatMoney(tx.amountMinor, tx.currency) %>
+        </span>
+        <% const canEdit = role === 'admin' || (tx.userId && tx.userId === currentUser.id); %>
+        <% if (canEdit) { %>
+          <span class="tx-row__actions">
+            <a class="btn btn--ghost btn--sm" href="/homes/<%= home.id %>/transactions/<%= tx.id %>/edit">Editar</a>
+            <form method="POST" action="/homes/<%= home.id %>/transactions/<%= tx.id %>/delete"
+                  data-confirm="¿Eliminar este movimiento?">
+              <button class="btn btn--danger btn--sm" type="submit">Eliminar</button>
+            </form>
+          </span>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+
+  <nav class="pagination" aria-label="Paginación">
+    <% const qs = (p) => {
+         const params = new URLSearchParams();
+         if (filters.from) params.set('from', filters.from);
+         if (filters.to) params.set('to', filters.to);
+         if (filters.type) params.set('type', filters.type);
+         if (filters.categoryId) params.set('categoryId', filters.categoryId);
+         if (filters.accountId) params.set('accountId', filters.accountId);
+         if (filters.mine) params.set('mine', 'true');
+         params.set('page', p);
+         return params.toString();
+       }; %>
+    <% if (meta.hasPrev) { %>
+      <a class="btn btn--ghost btn--sm" href="?<%= qs(meta.page - 1) %>">← Anterior</a>
+    <% } else { %>
+      <span class="btn btn--ghost btn--sm is-disabled">← Anterior</span>
+    <% } %>
+    <span class="pagination__info">Página <%= meta.page %> / <%= meta.totalPages %></span>
+    <% if (meta.hasNext) { %>
+      <a class="btn btn--ghost btn--sm" href="?<%= qs(meta.page + 1) %>">Siguiente →</a>
+    <% } else { %>
+      <span class="btn btn--ghost btn--sm is-disabled">Siguiente →</span>
+    <% } %>
+  </nav>
+<% } %>

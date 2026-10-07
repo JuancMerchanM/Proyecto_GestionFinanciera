@@ -1,0 +1,81 @@
+<section class="page-head">
+  <h1><%= home.name %> · Dashboard</h1>
+  <div class="page-head__actions">
+    <a class="btn btn--ghost" href="/homes/<%= home.id %>">Volver</a>
+    <a class="btn btn--primary" href="/homes/<%= home.id %>/transactions">Movimientos</a>
+  </div>
+</section>
+
+<form class="filters-bar" method="GET" action="/homes/<%= home.id %>/dashboard">
+  <label>Desde
+    <input class="form-control" type="date" name="from" value="<%= summary.range.from %>">
+  </label>
+  <label>Hasta
+    <input class="form-control" type="date" name="to" value="<%= summary.range.to %>">
+  </label>
+  <div class="filters-bar__actions">
+    <button class="btn btn--primary btn--sm" type="submit">Aplicar</button>
+    <a class="btn btn--ghost btn--sm" href="/homes/<%= home.id %>/dashboard">Mes actual</a>
+  </div>
+</form>
+
+<p class="muted">
+  Periodo: <strong><%= summary.range.from %></strong> → <strong><%= summary.range.to %></strong>
+  (<%= summary.range.days %> día(s)) · moneda <%= summary.currency %>
+</p>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <span class="stat-card__label">Balance total</span>
+    <span class="stat-card__value"><%= formatMoney(summary.balanceMinor, summary.currency) %></span>
+    <span class="stat-card__hint muted">Cuentas activas · todos los tiempos</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card__label">Ingresos del periodo</span>
+    <span class="stat-card__value is-income"><%= formatMoney(summary.incomeMinor, summary.currency) %></span>
+    <span class="stat-card__hint muted">Anterior: <%= formatMoney(summary.previous.incomeMinor, summary.currency) %></span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card__label">Gastos del periodo</span>
+    <span class="stat-card__value is-expense"><%= formatMoney(summary.expenseMinor, summary.currency) %></span>
+    <span class="stat-card__hint muted">Anterior: <%= formatMoney(summary.previous.expenseMinor, summary.currency) %></span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card__label">Neto del periodo</span>
+    <span class="stat-card__value <%= summary.netMinor >= 0 ? 'is-income' : 'is-expense' %>">
+      <%= formatMoney(summary.netMinor, summary.currency) %>
+    </span>
+    <span class="stat-card__hint muted">Anterior: <%= formatMoney(summary.previous.netMinor, summary.currency) %></span>
+  </div>
+</div>
+
+<div class="card chart-card">
+  <h2>Gastos por categoría</h2>
+  <% if (summary.expensesByCategory.length === 0) { %>
+    <p class="muted">No hay gastos en este periodo.</p>
+  <% } else { %>
+    <div class="chart-wrap">
+      <canvas id="expenses-donut" width="260" height="260"
+              aria-label="Gráfico de gastos por categoría" role="img"></canvas>
+      <ul class="chart-legend">
+        <% summary.expensesByCategory.forEach(item => { %>
+          <li>
+            <span class="chart-legend__dot" style="background:<%= item.category ? item.category.color : '#9aa3b5' %>"></span>
+            <span class="chart-legend__label"><%= item.label %></span>
+            <span class="chart-legend__value">
+              <%= formatMoney(item.amountMinor, summary.currency) %> · <%= item.percent %>%
+            </span>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+</div>
+
+<% const dashData = {
+  currency: summary.currency,
+  labels: summary.expensesByCategory.map(i => i.label),
+  values: summary.expensesByCategory.map(i => i.amountMinor),
+  colors: summary.expensesByCategory.map(i => (i.category ? i.category.color : '#9aa3b5')),
+}; %>
+<script type="application/json" id="dash-data"><%- JSON.stringify(dashData).replace(/</g, '\\u003c') %></script>

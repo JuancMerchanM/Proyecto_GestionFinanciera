@@ -1,0 +1,59 @@
+<section class="page-head">
+  <h1><%= home.name %> · Cuentas</h1>
+  <div class="page-head__actions">
+    <a class="btn btn--ghost" href="/homes/<%= home.id %>">Volver al hogar</a>
+    <% if (role === 'admin') { %>
+      <a class="btn btn--primary" href="/homes/<%= home.id %>/accounts/new">Nueva cuenta</a>
+    <% } %>
+  </div>
+</section>
+
+<% if (success) { %><div class="flash flash--success" role="status"><%= success %></div><% } %>
+<% if (error) { %><div class="flash flash--error" role="alert"><%= error %></div><% } %>
+
+<div class="filters">
+  <a class="chip <%= !includeArchived ? 'chip--active' : '' %>" href="/homes/<%= home.id %>/accounts">Activas</a>
+  <a class="chip <%= includeArchived ? 'chip--active' : '' %>" href="/homes/<%= home.id %>/accounts?archived=1">Archivadas</a>
+</div>
+
+<% const total = accounts.reduce((s, a) => s + (a.balanceMinor ?? 0), 0); %>
+<div class="card balance-card">
+  <span class="muted">Saldo total (<%= accounts.length %> cuenta(s))</span>
+  <strong class="balance-card__amount <%= total < 0 ? 'is-negative' : '' %>"><%= formatMoney(total, home.currency) %></strong>
+</div>
+
+<% if (accounts.length === 0) { %>
+  <div class="card"><p class="muted">No hay cuentas en esta vista.</p></div>
+<% } else { %>
+  <div class="grid">
+    <% accounts.forEach(a => { %>
+      <div class="card acc-card <%= a.archived ? 'cat-card--archived' : '' %>">
+        <div class="acc-card__head">
+          <span class="badge"><%= a.typeLabel %></span>
+          <span class="badge"><%= a.currency %></span>
+          <% if (a.archived) { %><span class="badge">archivada</span><% } %>
+        </div>
+        <h3 class="acc-card__name"><%= a.name %></h3>
+        <p class="acc-card__balance <%= (a.balanceMinor ?? 0) < 0 ? 'is-negative' : '' %>">
+          <%= formatMoney(a.balanceMinor ?? 0, a.currency) %>
+        </p>
+        <p class="muted acc-card__opening">Inicial: <%= formatMoney(a.openingBalanceMinor, a.currency) %></p>
+        <% if (role === 'admin') { %>
+          <div class="cat-card__actions">
+            <% if (a.archived) { %>
+              <form method="POST" action="/homes/<%= home.id %>/accounts/<%= a.id %>/restore">
+                <button class="btn btn--ghost btn--sm" type="submit">Restaurar</button>
+              </form>
+            <% } else { %>
+              <a class="btn btn--ghost btn--sm" href="/homes/<%= home.id %>/accounts/<%= a.id %>/edit">Editar</a>
+              <form method="POST" action="/homes/<%= home.id %>/accounts/<%= a.id %>/delete"
+                    data-confirm="¿Eliminar «<%= a.name %>»? Si tiene transacciones se archivará.">
+                <button class="btn btn--danger btn--sm" type="submit">Eliminar</button>
+              </form>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+<% } %>

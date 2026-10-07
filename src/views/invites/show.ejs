@@ -1,0 +1,30 @@
+<section class="auth">
+  <div class="card auth__card">
+    <h1>Invitación a <%= invite.home.name %></h1>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="flash flash--error" role="alert"><%= error %></div>
+    <% } %>
+    <p>Te invita <strong><%= invite.invitedBy %></strong> a unirte como <span class="badge"><%= invite.role %></span></p>
+    <p class="muted">Moneda del hogar: <%= invite.home.currency %> ·
+      <% if (invite.status !== 'pending') { %>
+        Estado: <strong><%= invite.status %></strong>
+      <% } else if (new Date(invite.expiresAt) < new Date()) { %>
+        <strong>Expirada</strong>
+      <% } else { %>
+        Vence <%= new Date(invite.expiresAt).toLocaleDateString('es-CO') %>
+      <% } %>
+    </p>
+    <% if (invite.status === 'pending' && new Date(invite.expiresAt) >= new Date()) { %>
+      <div class="hero__actions">
+        <form method="POST" action="/invite/<%= invite.code %>/accept">
+          <button class="btn btn--primary" type="submit">Aceptar</button>
+        </form>
+        <form method="POST" action="/invite/<%= invite.code %>/reject">
+          <button class="btn btn--ghost" type="submit">Rechazar</button>
+        </form>
+      </div>
+    <% } else { %>
+      <p class="muted">Esta invitación ya no está disponible.</p>
+    <% } %>
+  </div>
+</section>

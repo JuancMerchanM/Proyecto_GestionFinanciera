@@ -1,0 +1,30 @@
+<section class="page-head">
+  <h1>Crear hogar</h1>
+</section>
+
+<div class="card auth__card" style="margin: 0 auto;">
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="flash flash--error" role="alert"><%= error %></div>
+  <% } %>
+  <form method="POST" action="/homes" data-validate="home" novalidate>
+    <div class="form-group">
+      <label for="name">Nombre del hogar</label>
+      <input class="form-control" type="text" id="name" name="name" required minlength="2" maxlength="60"
+             value="<%= form.name %>" placeholder="Hogar Pérez">
+      <p class="field-error" hidden></p>
+    </div>
+    <fieldset class="form-group">
+      <legend class="form-label">Moneda base (única por hogar)</legend>
+      <label class="radio">
+        <input type="radio" name="currency" value="COP" required checked>
+        COP — Peso colombiano (sin decimales)
+      </label>
+      <label class="radio">
+        <input type="radio" name="currency" value="USD" required>
+        USD — Dólar (2 decimales)
+      </label>
+      <p class="form-hint">No se puede cambiar una vez creado el hogar.</p>
+    </fieldset>
+    <button class="btn btn--primary btn--block" type="submit">Crear hogar</button>
+  </form>
+</div>

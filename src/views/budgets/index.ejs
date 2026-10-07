@@ -1,0 +1,64 @@
+<section class="page-head">
+  <h1><%= home.name %> · Presupuestos</h1>
+  <div class="page-head__actions">
+    <a class="btn btn--ghost" href="/homes/<%= home.id %>">Volver</a>
+    <% if (role === 'admin') { %>
+      <a class="btn btn--primary" href="/homes/<%= home.id %>/budgets/new">Nuevo presupuesto</a>
+    <% } %>
+  </div>
+</section>
+
+<% if (success) { %><div class="flash flash--success" role="status"><%= success %></div><% } %>
+<% if (error) { %><div class="flash flash--error" role="alert"><%= error %></div><% } %>
+
+<form class="filters-bar" method="GET" action="/homes/<%= home.id %>/budgets">
+  <label>Mes
+    <input class="form-control" type="month" name="month" value="<%= month %>">
+  </label>
+  <div class="filters-bar__actions">
+    <button class="btn btn--primary btn--sm" type="submit">Filtrar</button>
+    <a class="btn btn--ghost btn--sm" href="/homes/<%= home.id %>/budgets">Todos</a>
+  </div>
+</form>
+
+<% if (budgets.length === 0) { %>
+  <div class="card">
+    <p class="muted">No hay presupuestos<%= month ? ` para ${month}` : '' %>.</p>
+    <% if (role === 'admin') { %>
+      <p class="muted">Crea uno para controlar el gasto mensual por categoría.</p>
+    <% } %>
+  </div>
+<% } else { %>
+  <ul class="budget-list">
+    <% budgets.forEach(b => { %>
+      <li class="budget-row <%= b.exceeded ? 'is-over' : '' %>">
+        <div class="budget-row__main">
+          <div class="budget-row__head">
+            <span class="tx-row__title"><%= b.category ? b.category.name : '(sin categoría)' %></span>
+            <span class="badge"><%= b.month %></span>
+            <% if (b.exceeded) { %><span class="badge badge--danger">¡Excedido!</span><% } %>
+          </div>
+          <div class="progress" role="progressbar" aria-valuenow="<%= b.percent %>" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress__bar <%= b.exceeded ? 'is-over' : '' %>" style="width: <%= Math.min(b.percent, 100) %>%"></div>
+          </div>
+          <p class="budget-row__meta">
+            <%= formatMoney(b.spentMinor, b.currency) %> de <%= formatMoney(b.limitMinor, b.currency) %>
+            · <strong><%= b.percent %>%</strong>
+            <% if (b.exceeded) { %>
+              · excedido en <%= formatMoney(b.overMinor, b.currency) %>
+            <% } %>
+          </p>
+        </div>
+        <% if (role === 'admin') { %>
+          <span class="tx-row__actions">
+            <a class="btn btn--ghost btn--sm" href="/homes/<%= home.id %>/budgets/<%= b.id %>/edit">Editar</a>
+            <form method="POST" action="/homes/<%= home.id %>/budgets/<%= b.id %>/delete"
+                  data-confirm="¿Eliminar este presupuesto?">
+              <button class="btn btn--danger btn--sm" type="submit">Eliminar</button>
+            </form>
+          </span>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
