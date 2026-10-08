@@ -8,9 +8,6 @@
   </div>
 </section>
 
-<% if (success) { %><div class="flash flash--success" role="status"><%= success %></div><% } %>
-<% if (error) { %><div class="flash flash--error" role="alert"><%= error %></div><% } %>
-
 <form class="filters-bar" method="GET" action="/homes/<%= home.id %>/budgets">
   <label>Mes
     <input class="form-control" type="month" name="month" value="<%= month %>">

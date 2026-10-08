@@ -1,7 +1,5 @@
 import * as accountService from '../../services/accountService.mjs';
 
-const msg = (req, key) => req.query[key] ?? null;
-
 // El formulario envía el saldo en unidades decimales; se convierte a entero mínimo.
 const toMinorBody = (body, currency) => {
   const raw = body?.openingBalanceDecimal;
@@ -23,8 +21,6 @@ export const index = async (req, res, next) => {
       role: req.homeRole,
       includeArchived,
       accounts: await accountService.listAccounts(req.home, { includeArchived }),
-      success: msg(req, 'success'),
-      error: msg(req, 'error'),
     });
   } catch (err) {
     next(err);
@@ -37,7 +33,6 @@ export const showNew = (req, res) => {
     home: { id: req.params.homeId, name: req.home.name, currency: req.home.currency },
     account: null,
     form: { type: 'cash' },
-    error: msg(req, 'error'),
   });
 };
 
@@ -78,7 +73,6 @@ export const showEdit = async (req, res, next) => {
       home: { id: req.params.homeId, name: req.home.name, currency: req.home.currency },
       account: pub,
       form: { ...pub },
-      error: msg(req, 'error'),
     });
   } catch (err) {
     if (err.status === 404) {

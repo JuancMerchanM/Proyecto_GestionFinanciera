@@ -9,14 +9,11 @@ const currentHomeCookie = (homeId) => ({
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 días
 });
 
-const message = (req, key) => req.query[key] ?? null;
-
 export const index = async (req, res, next) => {
   try {
     res.render('homes/index', {
       title: 'Mis hogares',
       homes: await homeService.listHomesForUser(req.user),
-      error: message(req, 'error'),
     });
   } catch (err) {
     next(err);
@@ -27,7 +24,6 @@ export const showNew = (req, res) => {
   res.render('homes/new', {
     title: 'Crear hogar',
     form: { name: '' },
-    error: message(req, 'error'),
   });
 };
 
@@ -63,8 +59,6 @@ export const show = async (req, res, next) => {
       members,
       invites,
       inviteUrl: (code) => `${req.protocol}://${req.get('host')}/invite/${code}`,
-      success: message(req, 'success'),
-      error: message(req, 'error'),
     });
   } catch (err) {
     next(err);

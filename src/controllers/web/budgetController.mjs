@@ -1,8 +1,6 @@
 import * as budgetService from '../../services/budgetService.mjs';
 import * as categoryService from '../../services/categoryService.mjs';
 
-const msg = (req, key) => req.query[key] ?? null;
-
 const currentMonth = () => new Date().toISOString().slice(0, 7);
 
 // El formulario envía el límite en unidades decimales; se convierte a entero mínimo.
@@ -63,8 +61,6 @@ export const index = async (req, res, next) => {
       budgets,
       categories: expenseCategories,
       month,
-      success: msg(req, 'success'),
-      error: msg(req, 'error'),
     });
   } catch (err) {
     if (err.status === 400) {

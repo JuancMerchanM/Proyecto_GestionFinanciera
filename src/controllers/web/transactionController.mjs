@@ -2,8 +2,6 @@ import * as transactionService from '../../services/transactionService.mjs';
 import * as accountService from '../../services/accountService.mjs';
 import * as categoryService from '../../services/categoryService.mjs';
 
-const msg = (req, key) => req.query[key] ?? null;
-
 const today = () => new Date().toISOString().slice(0, 10);
 
 const formData = (req, home) => {
@@ -53,7 +51,6 @@ const renderForm = (req, res, { status = 200, tx = null, error = null, form = nu
       accounts,
       categories,
       error,
-      success: msg(req, 'success'),
     });
   });
 };
@@ -83,8 +80,6 @@ export const index = async (req, res, next) => {
       categories,
       filters,
       ...result,
-      success: msg(req, 'success'),
-      error: msg(req, 'error'),
     });
   } catch (err) {
     if (err.status === 400) {

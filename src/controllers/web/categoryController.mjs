@@ -1,7 +1,5 @@
 import * as categoryService from '../../services/categoryService.mjs';
 
-const msg = (req, key) => req.query[key] ?? null;
-
 export const index = async (req, res, next) => {
   try {
     const includeArchived = req.query.archived === '1';
@@ -11,8 +9,6 @@ export const index = async (req, res, next) => {
       role: req.homeRole,
       includeArchived,
       categories: await categoryService.listCategories(req.home._id, { includeArchived }),
-      success: msg(req, 'success'),
-      error: msg(req, 'error'),
     });
   } catch (err) {
     next(err);
@@ -24,7 +20,6 @@ export const showNew = (req, res) => {
     title: 'Nueva categoría',
     home: { id: req.params.homeId, name: req.home.name, currency: req.home.currency },
     category: null,
-    error: msg(req, 'error'),
   });
 };
 
@@ -60,7 +55,6 @@ export const showEdit = async (req, res, next) => {
       home: { id: req.params.homeId, name: req.home.name, currency: req.home.currency },
       category: categoryService.toPublic(cat),
       form: { ...categoryService.toPublic(cat) },
-      error: msg(req, 'error'),
     });
   } catch (err) {
     if (err.status === 404) {

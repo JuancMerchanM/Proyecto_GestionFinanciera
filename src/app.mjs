@@ -1,6 +1,6 @@
 import { env } from './config/env.mjs';
 import { connectDb } from './config/db.mjs';
-import { swaggerSpec } from './config/swagger.mjs';
+import { swaggerHtml } from './config/swagger.mjs';
 
 import express from 'express';
 import path from 'node:path';
@@ -39,33 +39,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: false }));
+app.use('/api-docs', swaggerUi.serve, (req, res) => res.send(swaggerHtml));
 app.use(healthRouter);
 app.use('/api', apiRouter);
 app.use('/', webRouter);
 
 app.use(notFound);
 app.use(errorHandler);
-
-// const start = async () => {
-//   try {
-//     await connectDb();
-//     console.log('[db] conectada');
-//   } catch (err) {
-//     console.error('[db] error de conexión:', err.message);
-//     process.exit(1);
-//   }
-//
-//   app.listen(env.port, () => {
-//     console.log(`[server] http://localhost:${env.port}`);
-//     console.log(`[server] swagger  http://localhost:${env.port}/api-docs`);
-//   });
-// };
-//
-// if (process.env.NODE_ENV !== 'test') {
-//   start();
-// }
-//
 
 const start = async () => {
   try {
@@ -75,7 +55,27 @@ const start = async () => {
     console.error('[db] error de conexión:', err.message);
     process.exit(1);
   }
+
+  app.listen(env.port, () => {
+    console.log(`[server] http://localhost:${env.port}`);
+    console.log(`[server] swagger  http://localhost:${env.port}/api-docs`);
+  });
+};
+
+if (process.env.NODE_ENV !== 'test') {
+  start();
 }
+
+
+// const start = async () => {
+//   try {
+//     await connectDb();
+//     console.log('[db] conectada');
+//   } catch (err) {
+//     console.error('[db] error de conexión:', err.message);
+//     process.exit(1);
+//   }
+// }
 start();
 
 export default app;

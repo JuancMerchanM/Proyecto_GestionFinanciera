@@ -56,8 +56,6 @@ export const showLogin = (req, res) => {
     title: 'Iniciar sesión',
     form: { email: '' },
     next: safeNext(req.query.next),
-    error: req.query.error ?? null,
-    success: req.query.success ?? null,
   });
 };
 

@@ -14,8 +14,6 @@ export const show = async (req, res, next) => {
     res.render('invites/show', {
       title: 'Invitación',
       invite,
-      error: req.query.error ?? null,
-      success: req.query.success ?? null,
     });
   } catch (err) {
     if (err.status === 404) {

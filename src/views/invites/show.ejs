@@ -1,9 +1,6 @@
 <section class="auth">
   <div class="card auth__card">
     <h1>Invitación a <%= invite.home.name %></h1>
-    <% if (typeof error !== 'undefined' && error) { %>
-      <div class="flash flash--error" role="alert"><%= error %></div>
-    <% } %>
     <p>Te invita <strong><%= invite.invitedBy %></strong> a unirte como <span class="badge"><%= invite.role %></span></p>
     <p class="muted">Moneda del hogar: <%= invite.home.currency %> ·
       <% if (invite.status !== 'pending') { %>

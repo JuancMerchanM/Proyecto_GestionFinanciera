@@ -4,9 +4,6 @@
     <% if (typeof error !== 'undefined' && error) { %>
       <div class="flash flash--error" role="alert"><%= error %></div>
     <% } %>
-    <% if (typeof success !== 'undefined' && success) { %>
-      <div class="flash flash--success" role="status"><%= success %></div>
-    <% } %>
     <form method="POST" action="/login" data-validate="login" novalidate>
       <input type="hidden" name="next" value="<%= typeof next !== 'undefined' && next ? next : '/' %>">
       <div class="form-group">
