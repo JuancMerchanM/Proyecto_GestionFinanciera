@@ -14,7 +14,10 @@ const options = {
         'siempre como **enteros en la unidad mínima** de la moneda del hogar ' +
         '(ej: 50000 con currency COP = $50.000 COP; 1050 con currency USD = US$10.50).',
     },
-    servers: [{ url: `http://localhost:${env.port}`, description: 'Servidor local' }],
+    servers: [
+      { url: `http://localhost:${env.port}`, description: 'Servidor local' },
+      { url: `https://proyecto-gestion-financiera-eta.vercel.app`, description: 'Servidor desplegado en vercel' }
+    ],
     tags: [
       { name: 'Sistema', description: 'Salud del servicio' },
       { name: 'Autenticación', description: 'Registro, login, perfil y logout' },
