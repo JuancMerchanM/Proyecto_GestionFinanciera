@@ -3,6 +3,7 @@ node_modules/
 *.log
 .DS_Store
 .data/
+snapshots-migracion/
 all-files.txt
 run-me
 *.txt
