@@ -13,6 +13,16 @@
   <label>Hasta
     <input class="form-control" type="date" name="to" value="<%= summary.range.to %>">
   </label>
+  <% if (role === 'admin') { %>
+    <label>Persona
+      <select class="form-control" name="userId">
+        <option value="">Todas</option>
+        <% members.forEach(m => { %>
+          <option value="<%= m.userId %>" <%= timeline.filter.userId === m.userId ? 'selected' : '' %>><%= m.name %></option>
+        <% }) %>
+      </select>
+    </label>
+  <% } %>
   <div class="filters-bar__actions">
     <button class="btn btn--primary btn--sm" type="submit">Aplicar</button>
     <a class="btn btn--ghost btn--sm" href="/homes/<%= home.id %>/dashboard">Mes actual</a>
@@ -79,3 +89,42 @@
   colors: summary.expensesByCategory.map(i => (i.category ? i.category.color : '#9aa3b5')),
 }; %>
 <script type="application/json" id="dash-data"><%- JSON.stringify(dashData).replace(/</g, '\\u003c') %></script>
+
+<% const granLabel = timeline.range.granularity === 'daily' ? 'diaria'
+  : timeline.range.granularity === 'weekly' ? 'semanal' : 'mensual'; %>
+<div class="chart-grid">
+  <div class="card chart-card">
+    <h2>Ingresos y gastos en el tiempo</h2>
+    <p class="muted">Granularidad <%= granLabel %> · <%= timeline.range.from %> → <%= timeline.range.to %>
+      <% if (timeline.filter.userId) { %>
+        · filtrado por <%= (members.find(m => m.userId === timeline.filter.userId) || {}).name || 'una persona' %>
+      <% } else { %>
+        · todas las personas
+      <% } %>
+    </p>
+    <canvas id="timeline-chart" height="220"
+            aria-label="Gráfico de línea de ingresos y gastos en el tiempo" role="img"></canvas>
+  </div>
+  <div class="card chart-card">
+    <h2>Por persona</h2>
+    <p class="muted">Totales del periodo por miembro</p>
+    <canvas id="members-chart" height="220"
+            aria-label="Gráfico de barras de ingresos y gastos por persona" role="img"></canvas>
+  </div>
+</div>
+
+<% const timelineData = {
+  currency: timeline.currency,
+  granularity: timeline.range.granularity,
+  labels: timeline.timeline.map(b => b.label),
+  income: timeline.timeline.map(b => b.incomeMinor),
+  expense: timeline.timeline.map(b => b.expenseMinor),
+}; %>
+<script type="application/json" id="timeline-data"><%- JSON.stringify(timelineData).replace(/</g, '\\u003c') %></script>
+<% const membersData = {
+  currency: timeline.currency,
+  labels: timeline.byMember.map(m => m.name),
+  income: timeline.byMember.map(m => m.incomeMinor),
+  expense: timeline.byMember.map(m => m.expenseMinor),
+}; %>
+<script type="application/json" id="members-data"><%- JSON.stringify(membersData).replace(/</g, '\\u003c') %></script>

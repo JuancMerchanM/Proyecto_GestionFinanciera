@@ -188,5 +188,11 @@ router.get(
   requireHomeMember,
   reportController.summary
 );
+router.get(
+  '/:homeId/reports/timeline',
+  requireAuth,
+  requireHomeMember,
+  reportController.timeline
+);
 
 export default router;

@@ -386,8 +386,16 @@ fieldset { border: none; padding: 0; margin: 0 0 14px; }
 .chart-legend__label { flex: 1; font-weight: 600; }
 .chart-legend__value { color: var(--muted); white-space: nowrap; }
 
+/* Serie temporal y barras por persona */
+.chart-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
+.chart-card > canvas { max-width: 100%; }
+
 @media (min-width: 640px) {
   .chart-wrap { flex-direction: row; align-items: center; }
+}
+
+@media (min-width: 900px) {
+  .chart-grid { grid-template-columns: 1fr 1fr; }
 }
 
 /* Escritorio */
