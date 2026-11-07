@@ -10,6 +10,7 @@ import { Budget } from '../models/budget.ts';
 import { Account } from '../models/account.ts';
 import { Invite } from '../models/invite.ts';
 import { Notification } from '../models/notification.ts';
+import { Goal } from '../models/goal.ts';
 import { DEFAULT_CATEGORIES } from './seed/default-categories.ts';
 import { isSupportedCurrency } from '../config/currencies.ts';
 
@@ -149,6 +150,7 @@ export const deleteHome = async (home: IHome): Promise<void> => {
     Category.deleteMany({ homeId }),
     Invite.deleteMany({ homeId }),
     Notification.deleteMany({ homeId }),
+    Goal.deleteMany({ homeId }),
   ]);
   await Home.deleteOne({ _id: homeId });
   await User.updateMany({ homeIds: homeId }, { $pull: { homeIds: homeId } });

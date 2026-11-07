@@ -512,3 +512,17 @@ fieldset { border: none; padding: 0; margin: 0 0 14px; }
 }
 .notif-item__meta { font-size: 0.8rem; color: var(--muted); }
 .notif-item__actions { margin-left: auto; }
+
+/* ===== Metas de ahorro ===== */
+.budget-row.is-done { border-color: #b9e6cf; }
+.progress__bar.is-done { background: #1f9d61; }
+.goal-contrib { background: #fafbfd; }
+.goal-contrib__form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.goal-contrib__form label { font-size: 0.85rem; font-weight: 600; display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 150px; }
+.goal-contrib__form .form-control { min-width: 0; }

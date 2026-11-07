@@ -1,0 +1,31 @@
+<section class="page-head">
+  <h1><%= home.name %> · <%= title %></h1>
+  <div class="page-head__actions">
+    <a class="btn btn--ghost" href="/homes/<%= home.id %>/goals">Volver</a>
+  </div>
+</section>
+
+<% if (error) { %><div class="flash flash--error" role="alert"><%= error %></div><% } %>
+
+<form method="POST"
+      action="/homes/<%= home.id %>/goals<%= goal ? `/${goal.id}` : '' %>"
+      class="card form-grid">
+  <label>Nombre
+    <input class="form-control" type="text" name="name" required minlength="2" maxlength="60"
+           value="<%= values.name %>" placeholder="Ej: Viaje a la costa">
+  </label>
+  <label>Objetivo <%= home.currency %>
+    <input class="form-control" type="number" step="0.01" min="0.01" name="targetDecimal" required
+           value="<%= values.targetDecimal %>" placeholder="Ej: 2000000">
+  </label>
+  <label>Color (opcional)
+    <input class="form-control" type="color" name="color" value="<%= values.color || '#1f9d61' %>">
+  </label>
+  <label>Fecha límite (opcional)
+    <input class="form-control" type="date" name="deadline" value="<%= values.deadline || '' %>">
+  </label>
+  <div class="filters-bar__actions">
+    <button class="btn btn--primary" type="submit"><%= goal ? 'Guardar cambios' : 'Crear meta' %></button>
+    <a class="btn btn--ghost" href="/homes/<%= home.id %>/goals">Cancelar</a>
+  </div>
+</form>

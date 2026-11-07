@@ -5,6 +5,7 @@ import * as accountController from '../../controllers/api/accountController.ts';
 import * as transactionController from '../../controllers/api/transactionController.ts';
 import * as budgetController from '../../controllers/api/budgetController.ts';
 import * as reportController from '../../controllers/api/reportController.ts';
+import * as goalController from '../../controllers/api/goalController.ts';
 import { requireAuth } from '../../middlewares/auth.ts';
 import { requireHomeMember } from '../../middlewares/home.ts';
 import { requireRole } from '../../middlewares/role.ts';
@@ -193,6 +194,37 @@ router.get(
   requireAuth,
   requireHomeMember,
   reportController.timeline
+);
+
+// Metas de ahorro: lectura miembros, escritura solo admin
+router.get('/:homeId/goals', requireAuth, requireHomeMember, goalController.list);
+router.post(
+  '/:homeId/goals',
+  requireAuth,
+  requireHomeMember,
+  requireRole('admin'),
+  goalController.create
+);
+router.put(
+  '/:homeId/goals/:goalId',
+  requireAuth,
+  requireHomeMember,
+  requireRole('admin'),
+  goalController.update
+);
+router.delete(
+  '/:homeId/goals/:goalId',
+  requireAuth,
+  requireHomeMember,
+  requireRole('admin'),
+  goalController.remove
+);
+router.post(
+  '/:homeId/goals/:goalId/contributions',
+  requireAuth,
+  requireHomeMember,
+  requireRole('admin'),
+  goalController.contribute
 );
 
 export default router;

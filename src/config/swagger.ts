@@ -29,6 +29,7 @@ const options = {
       { name: 'Presupuestos', description: 'Presupuesto mensual por categoría y consumo' },
       { name: 'Reportes', description: 'Resumen del dashboard y gastos por categoría' },
       { name: 'Notificaciones', description: 'Notificaciones in-app del usuario' },
+      { name: 'Metas', description: 'Metas de ahorro con aportes y progreso' },
     ],
     components: {
       securitySchemes: {
@@ -87,6 +88,13 @@ const options = {
           required: true,
           schema: { type: 'string' },
           description: 'ID del presupuesto (debe pertenecer al hogar)',
+        },
+        goalId: {
+          in: 'path',
+          name: 'goalId',
+          required: true,
+          schema: { type: 'string' },
+          description: 'ID de la meta de ahorro (debe pertenecer al hogar)',
         },
       },
       schemas: {
@@ -266,6 +274,67 @@ const options = {
               example: 300000,
               description: 'Entero en unidad mínima (COP: 300000 = $300.000)',
             },
+          },
+        },
+        Goal: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            homeId: { type: 'string' },
+            name: { type: 'string', minLength: 2, maxLength: 60, example: 'Viaje a la costa' },
+            targetMinor: { type: 'integer', minimum: 1, example: 2000000 },
+            savedMinor: {
+              type: 'integer',
+              example: 500000,
+              description: 'Suma de los aportes (derivada, no guardada)',
+            },
+            percent: {
+              type: 'integer',
+              example: 25,
+              description: 'floor(saved*100/target), tope 100',
+            },
+            status: {
+              type: 'string',
+              enum: ['active', 'completed'],
+              description: 'Derivado: completed si saved >= target',
+            },
+            color: { type: 'string', nullable: true, example: '#1f9d61' },
+            deadline: { type: 'string', format: 'date', nullable: true, example: '2027-06-30' },
+            archived: { type: 'boolean', example: false },
+            createdBy: { type: 'string' },
+            currency: { type: 'string', enum: ['COP', 'USD'] },
+            contributions: {
+              type: 'array',
+              description: 'Aportes manuales (negativos = retiros)',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  amountMinor: { type: 'integer', example: 200000 },
+                  date: { type: 'string', format: 'date' },
+                  note: { type: 'string', maxLength: 200 },
+                  createdAt: { type: 'string', format: 'date-time' },
+                },
+              },
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        GoalInput: {
+          type: 'object',
+          required: ['name', 'targetMinor'],
+          properties: {
+            name: { type: 'string', minLength: 2, maxLength: 60, example: 'Viaje a la costa' },
+            targetMinor: {
+              type: 'integer',
+              minimum: 1,
+              example: 2000000,
+              description: 'Entero en unidad mínima (COP: 2000000 = $2.000.000)',
+            },
+            color: { type: 'string', nullable: true, example: '#1f9d61' },
+            deadline: { type: 'string', format: 'date', nullable: true, example: '2027-06-30' },
+            archived: { type: 'boolean', description: 'Solo en PUT (archivar/restaurar)' },
           },
         },
         ReportSummary: {

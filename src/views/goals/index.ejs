@@ -1,0 +1,83 @@
+<section class="page-head">
+  <h1><%= home.name %> · Metas de ahorro</h1>
+  <div class="page-head__actions">
+    <a class="btn btn--ghost" href="/homes/<%= home.id %>">Volver</a>
+    <% if (role === 'admin') { %>
+      <a class="btn btn--primary" href="/homes/<%= home.id %>/goals/new">Nueva meta</a>
+    <% } %>
+  </div>
+</section>
+
+<div class="filters-bar">
+  <div class="filters-bar__actions">
+    <a class="btn <%= archived ? 'btn--ghost' : 'btn--primary' %> btn--sm" href="/homes/<%= home.id %>/goals">Activas</a>
+    <a class="btn <%= archived ? 'btn--primary' : 'btn--ghost' %> btn--sm" href="/homes/<%= home.id %>/goals?archived=true">Archivadas</a>
+  </div>
+</div>
+
+<% if (goals.length === 0) { %>
+  <div class="card">
+    <p class="muted"><%= archived ? 'No hay metas archivadas.' : 'No hay metas de ahorro.' %></p>
+    <% if (role === 'admin' && !archived) { %>
+      <p class="muted">Crea una para empezar a ahorrar con un objetivo.</p>
+    <% } %>
+  </div>
+<% } else { %>
+  <ul class="budget-list">
+    <% goals.forEach(g => { %>
+      <li class="budget-row <%= g.status === 'completed' ? 'is-done' : '' %>">
+        <div class="budget-row__main">
+          <div class="budget-row__head">
+            <span class="tx-row__title">
+              <% if (g.color) { %><span class="chart-legend__dot" style="background:<%= g.color %>"></span> <% } %><%= g.name %>
+            </span>
+            <% if (g.status === 'completed') { %><span class="badge badge--role">¡Completada!</span><% } %>
+            <% if (g.deadline) { %><span class="badge">Límite <%= g.deadline %></span><% } %>
+            <% if (g.archived) { %><span class="badge">Archivada</span><% } %>
+          </div>
+          <div class="progress" role="progressbar" aria-valuenow="<%= g.percent %>" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress__bar <%= g.status === 'completed' ? 'is-done' : '' %>" style="width: <%= g.percent %>%"></div>
+          </div>
+          <p class="budget-row__meta">
+            <%= formatMoney(g.savedMinor, g.currency) %> de <%= formatMoney(g.targetMinor, g.currency) %>
+            · <strong><%= g.percent %>%</strong>
+            <% if (g.contributions.length > 0) { %>
+              · <%= g.contributions.length %> aporte(s)
+            <% } %>
+          </p>
+        </div>
+        <span class="tx-row__actions">
+          <% if (role === 'admin') { %>
+            <a class="btn btn--ghost btn--sm" href="/homes/<%= home.id %>/goals/<%= g.id %>/edit">Editar</a>
+            <form method="POST" action="/homes/<%= home.id %>/goals/<%= g.id %>/archive">
+              <button class="btn btn--ghost btn--sm" name="archived" value="<%= g.archived ? 'false' : 'true' %>" type="submit">
+                <%= g.archived ? 'Restaurar' : 'Archivar' %>
+              </button>
+            </form>
+            <form method="POST" action="/homes/<%= home.id %>/goals/<%= g.id %>/delete"
+                  data-confirm="¿Eliminar esta meta y sus aportes?">
+              <button class="btn btn--danger btn--sm" type="submit">Eliminar</button>
+            </form>
+          <% } %>
+        </span>
+      </li>
+      <% if (role === 'admin' && !g.archived) { %>
+        <li class="budget-row goal-contrib">
+          <form method="POST" action="/homes/<%= home.id %>/goals/<%= g.id %>/contributions" class="goal-contrib__form">
+            <label>Aportar / retirar a «<%= g.name %>»
+              <input class="form-control" type="number" step="0.01" name="amountDecimal" required
+                     placeholder="200000 (negativo para retirar)">
+            </label>
+            <label>Fecha
+              <input class="form-control" type="date" name="date" value="<%= new Date().toISOString().slice(0, 10) %>">
+            </label>
+            <label>Nota
+              <input class="form-control" type="text" name="note" maxlength="200" placeholder="Opcional">
+            </label>
+            <button class="btn btn--primary btn--sm" type="submit">Registrar</button>
+          </form>
+        </li>
+      <% } %>
+    <% }) %>
+  </ul>
+<% } %>

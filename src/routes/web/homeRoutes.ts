@@ -5,6 +5,7 @@ import * as accountController from '../../controllers/web/accountController.ts';
 import * as transactionController from '../../controllers/web/transactionController.ts';
 import * as budgetController from '../../controllers/web/budgetController.ts';
 import * as dashboardController from '../../controllers/web/dashboardController.ts';
+import * as goalController from '../../controllers/web/goalController.ts';
 import { requireAuthWeb } from '../../middlewares/auth.ts';
 import { requireHomeMember } from '../../middlewares/home.ts';
 import { requireRole } from '../../middlewares/role.ts';
@@ -65,6 +66,16 @@ router.post('/:homeId/budgets', ...admin, budgetController.create);
 router.get('/:homeId/budgets/:budgetId/edit', ...admin, budgetController.showEdit);
 router.post('/:homeId/budgets/:budgetId', ...admin, budgetController.update);
 router.post('/:homeId/budgets/:budgetId/delete', ...admin, budgetController.remove);
+
+// Metas de ahorro: lectura miembros, escritura solo admin
+router.get('/:homeId/goals', ...member, goalController.index);
+router.get('/:homeId/goals/new', ...admin, goalController.showNew);
+router.post('/:homeId/goals', ...admin, goalController.create);
+router.get('/:homeId/goals/:goalId/edit', ...admin, goalController.showEdit);
+router.post('/:homeId/goals/:goalId', ...admin, goalController.update);
+router.post('/:homeId/goals/:goalId/archive', ...admin, goalController.setArchived);
+router.post('/:homeId/goals/:goalId/delete', ...admin, goalController.remove);
+router.post('/:homeId/goals/:goalId/contributions', ...admin, goalController.contribute);
 
 // Dashboard
 router.get('/:homeId/dashboard', ...member, dashboardController.index);
