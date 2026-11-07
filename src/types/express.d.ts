@@ -21,6 +21,8 @@ declare global {
 export interface FlashLocals {
   success: string | null;
   error: string | null;
+  /** Aviso (ámbar) aditivo: presupuesto excedido, etc. */
+  warning: string | null;
 }
 
 /** Forma pública mínima de un hogar para el selector del nav. */
@@ -41,6 +43,8 @@ export interface AppLocals {
   currentHome: HomeNavOption | null;
   formatMoney: (amountMinor: number, currency: string) => string;
   currentUser: { id: string; name: string; email: string } | null;
+  /** Notificaciones no leídas del usuario (campana del nav); 0 sin sesión o en API. */
+  unreadCount: number;
 }
 
 export type AuthedRequest = Request & { user: IUser };

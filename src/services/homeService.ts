@@ -9,6 +9,7 @@ import { Transaction } from '../models/transaction.ts';
 import { Budget } from '../models/budget.ts';
 import { Account } from '../models/account.ts';
 import { Invite } from '../models/invite.ts';
+import { Notification } from '../models/notification.ts';
 import { DEFAULT_CATEGORIES } from './seed/default-categories.ts';
 import { isSupportedCurrency } from '../config/currencies.ts';
 
@@ -131,6 +132,8 @@ export const leaveHome = async (home: IHome, userId: Types.ObjectId): Promise<vo
   }
   await Home.updateOne({ _id: home._id }, { $pull: { members: { userId } } });
   await User.updateOne({ _id: userId }, { $pull: { homeIds: home._id } });
+  // Sus notificaciones del hogar dejan de ser relevantes (ya no es miembro).
+  await Notification.deleteMany({ homeId: home._id, userId });
 };
 
 /**
@@ -145,6 +148,7 @@ export const deleteHome = async (home: IHome): Promise<void> => {
     Account.deleteMany({ homeId }),
     Category.deleteMany({ homeId }),
     Invite.deleteMany({ homeId }),
+    Notification.deleteMany({ homeId }),
   ]);
   await Home.deleteOne({ _id: homeId });
   await User.updateMany({ homeIds: homeId }, { $pull: { homeIds: homeId } });
@@ -192,4 +196,6 @@ export const removeMember = async (
   }
   await Home.updateOne({ _id: home._id }, { $pull: { members: { userId: membership.userId } } });
   await User.updateOne({ _id: membership.userId }, { $pull: { homeIds: home._id } });
+  // Limpia sus notificaciones del hogar (ya no es miembro).
+  await Notification.deleteMany({ homeId: home._id, userId: membership.userId });
 };

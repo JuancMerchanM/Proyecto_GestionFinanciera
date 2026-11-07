@@ -24,6 +24,7 @@
         <% } else { %>
           <a href="/homes" class="nav__link">Mis hogares</a>
         <% } %>
+        <a href="/notifications" class="nav__link nav__bell" aria-label="Notificaciones">🔔<% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %><span class="nav__badge"><%= unreadCount %></span><% } %></a>
         <form method="POST" action="/logout" class="nav__form">
           <button class="nav__link nav__button" type="submit">Cerrar sesión</button>
         </form>

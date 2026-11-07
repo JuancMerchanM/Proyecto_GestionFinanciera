@@ -16,6 +16,7 @@ import webRouter from './routes/web/index.ts';
 import { authenticate } from './middlewares/auth.ts';
 import { formatMoney } from './utils/money.ts';
 import * as homeService from './services/homeService.ts';
+import * as notificationService from './services/notificationService.ts';
 import { notFound, errorHandler } from './middlewares/error.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -36,20 +37,25 @@ app.use(authenticate);
 // Locales de la vista: datos globales del nav (solo requests web con sesión).
 app.use((req, res, next) => {
   res.locals.year = new Date().getFullYear();
-  res.locals.flash = { success: req.query.success ?? null, error: req.query.error ?? null };
+  res.locals.flash = {
+    success: req.query.success ?? null,
+    error: req.query.error ?? null,
+    warning: req.query.warning ?? null,
+  };
   res.locals.currentHomeId = req.cookies?.currentHomeId ?? null;
   res.locals.formatMoney = formatMoney;
   res.locals.homes = [];
   res.locals.currentHome = null;
+  res.locals.unreadCount = 0;
 
   const isServerRoute = req.path.startsWith('/api') || req.path.startsWith('/health');
   if (!req.user || isServerRoute) return next();
 
-  homeService
-    .listHomesForUser(req.user)
-    .then((homes) => {
+  Promise.all([homeService.listHomesForUser(req.user), notificationService.countUnread(req.user._id)])
+    .then(([homes, unread]) => {
       res.locals.homes = homes;
       res.locals.currentHome = homes.find((h) => h.id === res.locals.currentHomeId) ?? null;
+      res.locals.unreadCount = unread;
       next();
     })
     .catch(next);

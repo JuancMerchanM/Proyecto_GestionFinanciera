@@ -10,6 +10,8 @@ import type { IAccount } from '../models/account.ts';
 import { User } from '../models/user.ts';
 import type { IUser } from '../models/user.ts';
 import type { Currency } from '../models/home.ts';
+import * as notificationService from './notificationService.ts';
+import type { BudgetWarning, TriggerTarget } from './notificationService.ts';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const MOVEMENT_VALUES: string[] = Object.values(MovementType);
@@ -117,15 +119,32 @@ interface IHomeLike {
   currency: Currency;
 }
 
+/** Resultado de una escritura de transacción: el documento + avisos de presupuesto. */
+export interface TransactionWriteResult {
+  transaction: ITransaction;
+  /** Presupuestos excedidos por la escritura (para flash / respuesta API). */
+  budgetWarnings: BudgetWarning[];
+}
+
+/** Ejecuta el disparador de presupuestos solo si la transacción es de gasto. */
+const afterWrite = async (
+  home: IHomeLike,
+  targets: TriggerTarget[]
+): Promise<BudgetWarning[]> => {
+  if (!targets.length) return [];
+  return notificationService.runBudgetCheck(home._id, home.currency, targets);
+};
+
 /**
  * Crea una transacción validada (montos, fechas y pertenencia al hogar).
+ * Después de crearla ejecuta el disparador de presupuestos (gastos).
  * Lanza HttpError(400) si los datos o las relaciones no son válidos.
  */
 export const createTransaction = async (
   home: IHomeLike,
   user: Pick<IUser, '_id'>,
   data: TransactionInput
-) => {
+): Promise<TransactionWriteResult> => {
   const clean = await validate(home, data);
   const tx = await Transaction.create({
     ...clean,
@@ -133,7 +152,11 @@ export const createTransaction = async (
     userId: user._id,
     currency: home.currency,
   });
-  return tx;
+  const budgetWarnings = await afterWrite(
+    home,
+    clean.type === MovementType.Expense ? [{ categoryId: clean.categoryId, date: clean.date }] : []
+  );
+  return { transaction: tx, budgetWarnings };
 };
 
 /**
@@ -172,7 +195,9 @@ const assertCanModify = (
 
 /**
  * Actualiza una transacción si el usuario tiene permiso sobre ella.
- * Lanza HttpError(400|403|404); devuelve la transacción actualizada.
+ * Re-evalúa el disparador de presupuestos para el (categoría, mes) anterior
+ * y el nuevo (cubre cambios de categoría/fecha y la auto-resolución).
+ * Lanza HttpError(400|403|404).
  */
 export const updateTransaction = async (
   home: IHomeLike,
@@ -180,7 +205,7 @@ export const updateTransaction = async (
   data: TransactionInput,
   user: Pick<IUser, '_id'>,
   homeRole: string | null | undefined
-) => {
+): Promise<TransactionWriteResult> => {
   const current = await getTransaction(home._id, txId);
   assertCanModify(current, user, homeRole);
   const merged: TransactionInput = {
@@ -193,11 +218,23 @@ export const updateTransaction = async (
   };
   const clean = await validate(home, merged);
   await Transaction.updateOne({ _id: current._id }, { $set: clean });
-  return getTransaction(home._id, txId);
+  const updated = await getTransaction(home._id, txId);
+
+  const targets: TriggerTarget[] = [];
+  if (current.type === MovementType.Expense) {
+    targets.push({ categoryId: current.categoryId, date: current.date });
+  }
+  if (clean.type === MovementType.Expense) {
+    targets.push({ categoryId: clean.categoryId, date: clean.date });
+  }
+  const budgetWarnings = await afterWrite(home, targets);
+  return { transaction: updated, budgetWarnings };
 };
 
 /**
  * Elimina una transacción si el usuario tiene permiso sobre ella.
+ * Si era de gasto, re-evalúa el presupuesto del mes (auto-resolución de
+ * notificaciones obsoletas).
  * Lanza HttpError(403|404); devuelve el documento eliminado.
  */
 export const deleteTransaction = async (
@@ -205,10 +242,13 @@ export const deleteTransaction = async (
   txId: Types.ObjectId | string,
   user: Pick<IUser, '_id'>,
   homeRole: string | null | undefined
-) => {
+): Promise<ITransaction> => {
   const current = await getTransaction(home._id, txId);
   assertCanModify(current, user, homeRole);
   await Transaction.deleteOne({ _id: current._id });
+  if (current.type === MovementType.Expense) {
+    await afterWrite(home, [{ categoryId: current.categoryId, date: current.date }]);
+  }
   return current;
 };
 

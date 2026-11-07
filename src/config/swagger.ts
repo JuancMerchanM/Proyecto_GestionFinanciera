@@ -28,6 +28,7 @@ const options = {
       { name: 'Transacciones', description: 'Movimientos con filtros y paginación' },
       { name: 'Presupuestos', description: 'Presupuesto mensual por categoría y consumo' },
       { name: 'Reportes', description: 'Resumen del dashboard y gastos por categoría' },
+      { name: 'Notificaciones', description: 'Notificaciones in-app del usuario' },
     ],
     components: {
       securitySchemes: {

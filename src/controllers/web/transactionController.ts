@@ -3,10 +3,32 @@ import { isHttpError } from '../../middlewares/error.ts';
 import * as transactionService from '../../services/transactionService.ts';
 import * as accountService from '../../services/accountService.ts';
 import * as categoryService from '../../services/categoryService.ts';
-import type { IHome } from '../../models/home.ts';
+import type { BudgetWarning } from '../../services/notificationService.ts';
+import type { Currency, IHome } from '../../models/home.ts';
 import type { ITransaction } from '../../models/transaction.ts';
+import { formatMoney } from '../../utils/money.ts';
 
 const today = () => new Date().toISOString().slice(0, 10);
+
+/** Redirect con ?success= y, si hubo excedidos, ?warning= (flash ámbar). */
+const successRedirect = (
+  basePath: string,
+  success: string,
+  warnings: BudgetWarning[],
+  currency: Currency
+): string => {
+  const params = new URLSearchParams();
+  params.set('success', success);
+  if (warnings.length > 0) {
+    const w = warnings[0];
+    params.set(
+      'warning',
+      `Presupuesto excedido en ${w.categoryName} (${w.month}): ` +
+        `${formatMoney(w.spentMinor, currency)} de ${formatMoney(w.limitMinor, currency)}`
+    );
+  }
+  return `${basePath}?${params.toString()}`;
+};
 
 const formData = (req: Request, home: IHome) => {
   const decimals = home.currency === 'USD' ? 2 : 0;
@@ -111,10 +133,19 @@ export const showNew: RequestHandler = (req, res, next) => {
 export const create: RequestHandler = async (req, res, next) => {
   try {
     const body = formData(req, req.home!);
-    const tx = await transactionService.createTransaction(req.home!, req.user!, body);
-    const label = tx.type === 'income' ? 'Ingreso' : 'Gasto';
+    const { transaction, budgetWarnings } = await transactionService.createTransaction(
+      req.home!,
+      req.user!,
+      body
+    );
+    const label = transaction.type === 'income' ? 'Ingreso' : 'Gasto';
     res.redirect(
-      `/homes/${req.params.homeId as string}/transactions?success=${encodeURIComponent(`${label} registrado`)}`
+      successRedirect(
+        `/homes/${req.params.homeId as string}/transactions`,
+        `${label} registrado`,
+        budgetWarnings,
+        req.home!.currency
+      )
     );
   } catch (err) {
     if (isHttpError(err) && (err.status === 400)) {
@@ -149,7 +180,7 @@ export const showEdit: RequestHandler = async (req, res, next) => {
 export const update: RequestHandler = async (req, res, next) => {
   try {
     const body = formData(req, req.home!);
-    await transactionService.updateTransaction(
+    const { budgetWarnings } = await transactionService.updateTransaction(
       req.home!,
       req.params.transactionId as string,
       body,
@@ -157,7 +188,12 @@ export const update: RequestHandler = async (req, res, next) => {
       req.homeRole
     );
     res.redirect(
-      `/homes/${req.params.homeId as string}/transactions?success=${encodeURIComponent('Transacción actualizada')}`
+      successRedirect(
+        `/homes/${req.params.homeId as string}/transactions`,
+        'Transacción actualizada',
+        budgetWarnings,
+        req.home!.currency
+      )
     );
   } catch (err) {
     if (isHttpError(err) && (err.status === 400)) {

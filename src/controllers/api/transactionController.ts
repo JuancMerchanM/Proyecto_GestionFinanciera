@@ -52,6 +52,18 @@ import * as transactionService from '../../services/transactionService.ts';
  *               type: object
  *               properties:
  *                 transaction: { $ref: '#/components/schemas/Transaction' }
+ *                 budgetWarnings:
+ *                   type: array
+ *                   description: Presupuestos excedidos por la transacción (aditivo, vacío si ninguno)
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       budget: { type: string }
+ *                       month: { type: string, example: '2026-12' }
+ *                       limitMinor: { type: integer, example: 100000 }
+ *                       spentMinor: { type: integer, example: 160000 }
+ *                       overMinor: { type: integer, example: 60000 }
+ *                       categoryName: { type: string, example: 'Alimentación' }
  *       '400': { $ref: '#/components/responses/Validation' }
  *       '403': { $ref: '#/components/responses/Forbidden' }
  */
@@ -66,8 +78,15 @@ export const list: RequestHandler = async (req, res, next) => {
 
 export const create: RequestHandler = async (req, res, next) => {
   try {
-    const tx = await transactionService.createTransaction(req.home!, req.user!, req.body ?? {});
-    res.status(201).json({ transaction: await transactionService.publicOne(tx) });
+    const { transaction, budgetWarnings } = await transactionService.createTransaction(
+      req.home!,
+      req.user!,
+      req.body ?? {}
+    );
+    res.status(201).json({
+      transaction: await transactionService.publicOne(transaction),
+      budgetWarnings,
+    });
   } catch (err) {
     next(err);
   }
@@ -98,7 +117,18 @@ export const create: RequestHandler = async (req, res, next) => {
  *           schema: { $ref: '#/components/schemas/TransactionInput' }
  *           example: { type: 'expense', amountMinor: 50000, date: '2026-10-06', accountId: '652f1c2e9a1b2c3d4e5f6a7c', categoryId: '652f1c2e9a1b2c3d4e5f6a7d', note: 'Mercado' }
  *     responses:
- *       '200': { description: Transacción actualizada }
+ *       '200':
+ *         description: Transacción actualizada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 transaction: { $ref: '#/components/schemas/Transaction' }
+ *                 budgetWarnings:
+ *                   type: array
+ *                   description: Presupuestos excedidos tras la edición (aditivo)
+ *                   items: { type: object }
  *       '400': { $ref: '#/components/responses/Validation' }
  *       '403': { description: No es su transacción y no es admin }
  *       '404': { description: Transacción no encontrada }
@@ -124,14 +154,14 @@ export const detail: RequestHandler = async (req, res, next) => {
 
 export const update: RequestHandler = async (req, res, next) => {
   try {
-    const tx = await transactionService.updateTransaction(
+    const { transaction, budgetWarnings } = await transactionService.updateTransaction(
       req.home!,
       req.params.transactionId as string,
       req.body ?? {},
       req.user!,
       req.homeRole
     );
-    res.json({ transaction: await transactionService.publicOne(tx) });
+    res.json({ transaction: await transactionService.publicOne(transaction), budgetWarnings });
   } catch (err) {
     next(err);
   }

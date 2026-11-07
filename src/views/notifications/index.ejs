@@ -1,0 +1,41 @@
+<section class="page-head">
+  <h1>Notificaciones</h1>
+  <div class="page-head__actions">
+    <% if (unreadCount > 0) { %>
+      <form method="POST" action="/notifications/read-all">
+        <button class="btn btn--ghost btn--sm" type="submit">Marcar todas como leídas</button>
+      </form>
+    <% } %>
+  </div>
+</section>
+
+<% if (groups.length === 0) { %>
+  <p class="muted">No tienes notificaciones.</p>
+<% } %>
+
+<% groups.forEach(group => { %>
+  <div class="card">
+    <h2><%= group.homeName %></h2>
+    <ul class="notif-list">
+      <% group.items.forEach(n => { %>
+        <li class="notif-item <%= n.read ? '' : 'is-unread' %>">
+          <div class="notif-item__body">
+            <div class="notif-item__title"><%= n.title %></div>
+            <div><%= n.message %></div>
+            <div class="notif-item__meta">
+              <%= n.createdAt.toISOString().slice(0, 16).replace('T', ' ') %> UTC
+              <% if (n.ref && n.ref.month) { %> · <%= n.ref.month %><% } %>
+            </div>
+          </div>
+          <% if (!n.read) { %>
+            <div class="notif-item__actions">
+              <form method="POST" action="/notifications/<%= n._id %>/read">
+                <button class="btn btn--ghost btn--sm" type="submit">Marcar leída</button>
+              </form>
+            </div>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+<% }) %>
