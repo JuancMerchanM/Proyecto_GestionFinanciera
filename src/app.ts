@@ -15,6 +15,7 @@ import apiRouter from './routes/api/index.ts';
 import webRouter from './routes/web/index.ts';
 import { authenticate } from './middlewares/auth.ts';
 import { formatMoney } from './utils/money.ts';
+import * as homeService from './services/homeService.ts';
 import { notFound, errorHandler } from './middlewares/error.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -32,12 +33,26 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(authenticate);
 
+// Locales de la vista: datos globales del nav (solo requests web con sesión).
 app.use((req, res, next) => {
   res.locals.year = new Date().getFullYear();
   res.locals.flash = { success: req.query.success ?? null, error: req.query.error ?? null };
   res.locals.currentHomeId = req.cookies?.currentHomeId ?? null;
   res.locals.formatMoney = formatMoney;
-  next();
+  res.locals.homes = [];
+  res.locals.currentHome = null;
+
+  const isServerRoute = req.path.startsWith('/api') || req.path.startsWith('/health');
+  if (!req.user || isServerRoute) return next();
+
+  homeService
+    .listHomesForUser(req.user)
+    .then((homes) => {
+      res.locals.homes = homes;
+      res.locals.currentHome = homes.find((h) => h.id === res.locals.currentHomeId) ?? null;
+      next();
+    })
+    .catch(next);
 });
 
 const swaggerHandler: RequestHandler = (_req, res) => res.send(swaggerHtml);

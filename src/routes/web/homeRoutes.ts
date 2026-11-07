@@ -69,6 +69,15 @@ router.post('/:homeId/budgets/:budgetId/delete', ...admin, budgetController.remo
 // Dashboard
 router.get('/:homeId/dashboard', ...member, dashboardController.index);
 
+// Gestión del hogar (editar nombre, bajas, miembros, invitaciones)
+router.get('/:homeId/edit', ...admin, homeController.showEdit);
+router.post('/:homeId', ...admin, homeController.update);
+router.post('/:homeId/leave', ...member, homeController.leave);
+router.post('/:homeId/delete', ...admin, homeController.remove);
+router.post('/:homeId/members/:userId', ...admin, homeController.updateMember);
+router.post('/:homeId/members/:userId/delete', ...admin, homeController.removeMember);
+router.post('/:homeId/invites/:code/revoke', ...admin, homeController.revokeInvite);
+
 router.get('/:homeId', ...member, homeController.show);
 
 export default router;

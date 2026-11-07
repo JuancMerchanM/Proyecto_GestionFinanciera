@@ -23,10 +23,22 @@ export interface FlashLocals {
   error: string | null;
 }
 
+/** Forma pública mínima de un hogar para el selector del nav. */
+export interface HomeNavOption {
+  id: string;
+  name: string;
+  currency: string;
+  role: Role | null;
+}
+
 export interface AppLocals {
   year: number;
   flash: FlashLocals;
   currentHomeId: string | null;
+  /** Hogares del usuario autenticado (selector del nav); vacío sin sesión o en API. */
+  homes: HomeNavOption[];
+  /** Hogar al que apunta la cookie actual, si sigue perteneciendo al usuario. */
+  currentHome: HomeNavOption | null;
   formatMoney: (amountMinor: number, currency: string) => string;
   currentUser: { id: string; name: string; email: string } | null;
 }

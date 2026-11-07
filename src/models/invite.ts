@@ -6,6 +6,8 @@ export enum InviteStatus {
   Pending = 'pending',
   Accepted = 'accepted',
   Rejected = 'rejected',
+  /** Anulada por un admin del hogar (distinto de rechazada por el invitado). */
+  Revoked = 'revoked',
 }
 
 export interface IInvite {

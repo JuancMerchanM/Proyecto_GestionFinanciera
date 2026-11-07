@@ -4,7 +4,22 @@
     <nav class="nav" aria-label="Principal">
       <% if (currentUser) { %>
         <span class="nav__user"><%= currentUser.name %></span>
-        <% if (currentHomeId) { %>
+        <% if (homes && homes.length > 0) { %>
+          <details class="nav__dropdown" id="home-switcher">
+            <summary class="nav__link nav__dropdown-toggle" aria-label="Cambiar de hogar">
+              <%= currentHome ? currentHome.name : 'Hogares' %> ▾
+            </summary>
+            <div class="dropdown__menu" role="menu">
+              <% homes.forEach(h => { %>
+                <a class="dropdown__item<%= h.id === currentHomeId ? ' is-active' : '' %>"
+                   role="menuitem" href="/homes/<%= h.id %>"><%= h.name %></a>
+              <% }) %>
+              <hr class="dropdown__divider">
+              <a class="dropdown__item" role="menuitem" href="/homes">Mis hogares</a>
+              <a class="dropdown__item" role="menuitem" href="/homes/new">Crear hogar</a>
+            </div>
+          </details>
+        <% } else if (currentHomeId) { %>
           <a href="/homes/<%= currentHomeId %>" class="nav__link">Mi hogar</a>
         <% } else { %>
           <a href="/homes" class="nav__link">Mis hogares</a>

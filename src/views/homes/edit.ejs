@@ -1,0 +1,22 @@
+<section class="page-head">
+  <h1>Editar hogar</h1>
+</section>
+
+<div class="card auth__card" style="margin: 0 auto;">
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="flash flash--error" role="alert"><%= error %></div>
+  <% } %>
+  <form method="POST" action="/homes/<%= home.id %>" data-validate="home" novalidate>
+    <div class="form-group">
+      <label for="name">Nombre del hogar</label>
+      <input class="form-control" type="text" id="name" name="name" required minlength="2" maxlength="60"
+             value="<%= form.name %>" placeholder="Hogar Pérez">
+      <p class="field-error" hidden></p>
+    </div>
+    <fieldset class="form-group">
+      <legend class="form-label">Moneda base</legend>
+      <p class="form-hint">La moneda no se puede cambiar una vez creado el hogar (actual: <%= home.currency %>).</p>
+    </fieldset>
+    <button class="btn btn--primary btn--block" type="submit">Guardar nombre</button>
+  </form>
+</div>

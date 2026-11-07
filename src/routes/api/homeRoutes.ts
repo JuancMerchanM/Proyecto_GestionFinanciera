@@ -14,7 +14,36 @@ const router = Router();
 router.get('/', requireAuth, homeController.list);
 router.post('/', requireAuth, homeController.create);
 router.get('/:homeId', requireAuth, requireHomeMember, homeController.detail);
+router.put(
+  '/:homeId',
+  requireAuth,
+  requireHomeMember,
+  requireRole('admin'),
+  homeController.update
+);
+router.delete(
+  '/:homeId',
+  requireAuth,
+  requireHomeMember,
+  requireRole('admin'),
+  homeController.remove
+);
+router.post('/:homeId/leave', requireAuth, requireHomeMember, homeController.leave);
 router.get('/:homeId/members', requireAuth, requireHomeMember, homeController.members);
+router.put(
+  '/:homeId/members/:userId',
+  requireAuth,
+  requireHomeMember,
+  requireRole('admin'),
+  homeController.updateMember
+);
+router.delete(
+  '/:homeId/members/:userId',
+  requireAuth,
+  requireHomeMember,
+  requireRole('admin'),
+  homeController.removeMember
+);
 router.post(
   '/:homeId/invites',
   requireAuth,
@@ -28,6 +57,13 @@ router.get(
   requireHomeMember,
   requireRole('admin'),
   homeController.listInvites
+);
+router.delete(
+  '/:homeId/invites/:code',
+  requireAuth,
+  requireHomeMember,
+  requireRole('admin'),
+  homeController.revokeInvite
 );
 
 // Categorías: lectura para miembros, escritura solo admin

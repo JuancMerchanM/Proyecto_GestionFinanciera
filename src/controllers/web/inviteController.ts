@@ -1,15 +1,6 @@
 import type { RequestHandler } from 'express';
-import type { Types } from 'mongoose';
 import { isHttpError } from '../../middlewares/error.ts';
 import * as inviteService from '../../services/inviteService.ts';
-import { env } from '../../config/env.ts';
-
-const currentHomeCookie = (homeId: string | Types.ObjectId) => ({
-  httpOnly: true,
-  sameSite: 'lax' as const,
-  secure: env.isProd,
-  maxAge: 30 * 24 * 60 * 60 * 1000,
-});
 
 export const show: RequestHandler = async (req, res, next) => {
   try {
@@ -33,7 +24,7 @@ export const show: RequestHandler = async (req, res, next) => {
 export const accept: RequestHandler = async (req, res, next) => {
   try {
     const { home, role } = await inviteService.acceptInvite(req.user!, req.params.code as string);
-    res.cookie('currentHomeId', home._id.toString(), currentHomeCookie(home._id));
+    // La cookie del hogar actual la setea requireHomeMember al seguir el redirect.
     res.redirect(
       `/homes/${home._id}?success=${encodeURIComponent(`Te uniste a ${home.name} como ${role}`)}`
     );

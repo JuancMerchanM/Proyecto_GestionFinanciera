@@ -6,8 +6,15 @@
     <a class="btn btn--ghost" href="/homes/<%= home.id %>/budgets">Presupuestos</a>
     <a class="btn btn--ghost" href="/homes/<%= home.id %>/accounts">Cuentas</a>
     <a class="btn btn--ghost" href="/homes/<%= home.id %>/categories">Categorías</a>
+    <% if (home.role === 'admin') { %>
+      <a class="btn btn--ghost" href="/homes/<%= home.id %>/edit">Editar</a>
+    <% } %>
     <span class="badge"><%= home.currency %></span>
     <span class="badge badge--role"><%= home.role %></span>
+    <form method="POST" action="/homes/<%= home.id %>/leave" class="nav__form"
+          data-confirm="¿Seguro que quieres salir del hogar «<%= home.name %>»?">
+      <button class="btn btn--ghost" type="submit">Salir del hogar</button>
+    </form>
   </div>
 </section>
 
@@ -23,6 +30,22 @@
         </span>
         <span class="muted member-list__email"><%= m.email %></span>
         <span class="badge <%= m.role === 'admin' ? 'badge--admin' : '' %>"><%= m.role %></span>
+        <% if (home.role === 'admin' && m.userId !== currentUser.id) { %>
+          <span class="member-list__actions">
+            <form method="POST" action="/homes/<%= home.id %>/members/<%= m.userId %>" class="role-form">
+              <label class="visually-hidden" for="role-<%= m.userId %>">Rol de <%= m.name %></label>
+              <select class="form-control form-control--sm" id="role-<%= m.userId %>" name="role">
+                <option value="admin" <%= m.role === 'admin' ? 'selected' : '' %>>admin</option>
+                <option value="member" <%= m.role === 'member' ? 'selected' : '' %>>member</option>
+              </select>
+              <button class="btn btn--ghost btn--sm" type="submit">Guardar rol</button>
+            </form>
+            <form method="POST" action="/homes/<%= home.id %>/members/<%= m.userId %>/delete"
+                  data-confirm="¿Quitar a <%= m.name %> del hogar? Sus movimientos se conservarán.">
+              <button class="btn btn--danger btn--sm" type="submit">Quitar</button>
+            </form>
+          </span>
+        <% } %>
       </li>
     <% }) %>
   </ul>
@@ -54,12 +77,30 @@
       <h3>Pendientes</h3>
       <ul class="invite-list">
         <% invites.forEach(inv => { %>
-          <li>
+          <li class="invite-list__item">
             <code class="code"><%= inv.code %></code>
             <span class="muted">→ <%= inviteUrl(inv.code) %> · rol <%= inv.role %><%= inv.email ? ' · ' + inv.email : '' %> · vence <%= new Date(inv.expiresAt).toLocaleDateString('es-CO') %></span>
+            <form method="POST" action="/homes/<%= home.id %>/invites/<%= inv.code %>/revoke"
+                  data-confirm="¿Revocar la invitación <%= inv.code %>? Dejará de poder usarse.">
+              <button class="btn btn--danger btn--sm" type="submit">Revocar</button>
+            </form>
           </li>
         <% }) %>
       </ul>
     <% } %>
+  </div>
+
+  <div class="card card--danger">
+    <h2>Zona de peligro</h2>
+    <p class="muted">Elimina el hogar y <strong>todos sus datos</strong> (movimientos, cuentas,
+      categorías, presupuestos e invitaciones). Esta acción es irreversible.</p>
+    <form method="POST" action="/homes/<%= home.id %>/delete" class="danger-form"
+          data-confirm="¿Eliminar definitivamente el hogar «<%= home.name %>»? Se borrarán todos sus datos.">
+      <label class="checkbox">
+        <input type="checkbox" name="confirm" value="1" required>
+        Entiendo que esta acción es irreversible
+      </label>
+      <button class="btn btn--danger" type="submit">Eliminar hogar</button>
+    </form>
   </div>
 <% } %>

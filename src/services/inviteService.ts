@@ -159,6 +159,31 @@ export const listPendingInvites = async (homeId: Types.ObjectId | string) => {
 };
 
 /**
+ * Revoca una invitación pendiente del hogar (la anula para que ya no pueda
+ * usarse). Acepta también las ya expiradas (limpieza).
+ * Lanza HttpError(404) si no existe o es de otro hogar, 409 si ya no está
+ * pendiente (usada/rechazada/revocada).
+ */
+export const revokeInvite = async (
+  homeId: Types.ObjectId | string,
+  code: unknown,
+  revokedBy: Types.ObjectId
+): Promise<{ code: string; status: InviteStatus }> => {
+  const invite = await findPendingInvite(code);
+  if (invite.homeId.toString() !== homeId.toString()) {
+    throw new HttpError(404, 'Invitación no encontrada');
+  }
+  if (invite.status !== InviteStatus.Pending) {
+    throw new HttpError(409, 'La invitación ya fue utilizada o rechazada');
+  }
+  await Invite.updateOne(
+    { _id: invite._id },
+    { status: InviteStatus.Revoked, resolvedBy: revokedBy, resolvedAt: new Date() }
+  );
+  return { code: invite.code, status: InviteStatus.Revoked };
+};
+
+/**
  * Convierte una invitación en su forma pública (sin datos internos).
  */
 export const inviteToPublic = (invite: IInvite) => ({
