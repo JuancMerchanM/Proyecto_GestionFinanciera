@@ -41,6 +41,10 @@
   <label class="radio radio--inline">
     <input type="checkbox" name="mine" value="true" <%= filters.mine ? 'checked' : '' %>> Solo míos
   </label>
+  <label>Buscar en notas
+    <input class="form-control" type="text" name="q" value="<%= filters.q %>" maxlength="200"
+           placeholder="Ej: mercado, uber…">
+  </label>
   <div class="filters-bar__actions">
     <button class="btn btn--primary btn--sm" type="submit">Aplicar</button>
     <a class="btn btn--ghost btn--sm" href="/homes/<%= home.id %>/transactions">Limpiar</a>

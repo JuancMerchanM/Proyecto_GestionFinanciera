@@ -104,6 +104,7 @@ export const index: RequestHandler = async (req, res, next) => {
       categoryId: req.query.categoryId ?? '',
       accountId: req.query.accountId ?? '',
       mine: req.query.mine === 'true' || req.query.mine === '1',
+      q: req.query.q ?? '',
     };
     res.render('transactions/index', {
       title: 'Movimientos',

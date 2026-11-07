@@ -15,6 +15,7 @@ import * as transactionService from '../../services/transactionService.ts';
  *       - { in: query, name: accountId, schema: { type: string } }
  *       - { in: query, name: type, schema: { type: string, enum: [income, expense] } }
  *       - { in: query, name: mine, schema: { type: boolean }, description: 'Solo mis movimientos' }
+ *       - { in: query, name: q, schema: { type: string, maxLength: 200 }, description: 'Búsqueda en la nota del movimiento (literal, sin distinguir mayúsculas)' }
  *       - { in: query, name: page, schema: { type: integer, default: 1 } }
  *       - { in: query, name: limit, schema: { type: integer, default: 20, maximum: 100 } }
  *     responses:

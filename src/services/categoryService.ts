@@ -7,7 +7,8 @@ import type { ICategory } from '../models/category.ts';
 const COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 const TYPES = Object.values(MovementType);
 
-const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** Escapa los metacaracteres de una regex (búsquedas por texto literal). */
+export const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 interface CategoryInput {
   name?: unknown;

@@ -12,6 +12,7 @@ import type { IUser } from '../models/user.ts';
 import type { Currency } from '../models/home.ts';
 import * as notificationService from './notificationService.ts';
 import type { BudgetWarning, TriggerTarget } from './notificationService.ts';
+import { escapeRe } from './categoryService.ts';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const MOVEMENT_VALUES: string[] = Object.values(MovementType);
@@ -253,8 +254,9 @@ export const deleteTransaction = async (
 };
 
 /**
- * Lista transacciones del hogar con filtros (tipo, categoría, cuenta, rango)
- * y paginación. Solo el admin ve movimientos de todos los miembros.
+ * Lista transacciones del hogar con filtros (tipo, categoría, cuenta, rango,
+ * búsqueda `q` en la nota) y paginación. Solo el admin ve movimientos de
+ * todos los miembros.
  */
 export const listTransactions = async (
   home: IHomeLike,
@@ -278,6 +280,13 @@ export const listTransactions = async (
   if (query.mine === 'true' || query.mine === '1') {
     if (!user) throw new HttpError(400, 'Filtro mine requiere usuario');
     filter.userId = user._id;
+  }
+  // Búsqueda por nota: texto literal escapado, sin distinción de mayúsculas
+  // (se compone con el resto de filtros; sin índice de texto por ahora).
+  if (typeof query.q === 'string' && query.q.trim()) {
+    const q = query.q.trim();
+    if (q.length > 200) throw new HttpError(400, 'Búsqueda demasiado larga (máx. 200 caracteres)');
+    filter.note = { $regex: escapeRe(q), $options: 'i' };
   }
 
   const from = query.from ? parseDate(query.from) : null;
