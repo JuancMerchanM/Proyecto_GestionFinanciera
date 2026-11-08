@@ -5,6 +5,8 @@
     "moduleResolution": "nodenext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["node"],
+    "typeRoots": [ "./node_modules/@types", "../node_modules/@types",
+      "../../node_modules/@types" ],
     "strict": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
