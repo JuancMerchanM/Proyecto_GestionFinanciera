@@ -47,4 +47,6 @@ export interface AppLocals {
   unreadCount: number;
 }
 
+const __diagnostico: number = "esto-es-un-error-a-proposito";
+
 export type AuthedRequest = Request & { user: IUser };
