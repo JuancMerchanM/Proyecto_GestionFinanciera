@@ -19,6 +19,8 @@ import * as homeService from './services/homeService.ts';
 import * as notificationService from './services/notificationService.ts';
 import { notFound, errorHandler } from './middlewares/error.ts';
 
+import './types/express.d.ts';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const app = express();
