@@ -111,6 +111,18 @@ Fecha: 09/11/2026
   java -jar herramientas/plantuml.jar -tpng -o /tmp/opencode/preview figuras/plantuml/<figura>.puml
   Los PNG son solo para inspección; no se incluyen en el PDF del artículo.
 
+2.7 Inserción en el artículo (solo PDF vectorial)
+  Fig. 1a/1b y Fig. 5a/5b: figure* con dos subfigure de 0.48\linewidth;
+    \includegraphics[width=\linewidth] en cada subfigura.
+  Fig. 2, 3 y 4: figure* con \includegraphics[width=\textwidth].
+  No se usa \resizebox ni rotación. Tamaño tipográfico efectivo aproximado
+  (alto de glifo nativo 14.3 pt escalado al ancho de inserción):
+    Fig. 1a 8.3 pt | Fig. 1b 8.3 pt | Fig. 2 6.4 pt | Fig. 3 5.7 pt
+    Fig. 4 5.0 pt  | Fig. 5a 7.3 pt | Fig. 5b 10.0 pt
+  Las Fig. 3 y 4 quedan por debajo de 7 pt porque su relación de aspecto
+  (1.30:1 y 4.36:1) agota el ancho de página; para superar ese umbral habría
+  que regenerarlas con espaciado más compacto o rotarlas.
+
 3. COMPILACIÓN DEL DOCUMENTO
 ----------------------------
 
@@ -155,6 +167,6 @@ Fecha: 09/11/2026
 
 4. SALIDAS
 ----------
-  documentacion_migracion.pdf   (PDF final, 4 páginas en el Bloque (a))
+  documentacion_migracion.pdf   (PDF final, 10 páginas con las 7 figuras)
   documentacion_migracion.aux   (auxiliar, regenerable)
   documentacion_migracion.log   (registro de compilación; 0 overfull)
