@@ -1,0 +1,51 @@
+@startuml secuencia-registrar-gasto
+' SUBPROMPT (sección 8.3): Diagrama de secuencia UML.
+' Escenario canónico: registrar una transacción (gasto).
+' Participantes (≤ 8): Usuario, Vista EJS, Ruta Web, Middleware, Controlador Web,
+' Servicio, Modelo, MongoDB. Flujo condensado a 18 mensajes: se conservan las
+' llamadas significativas y se omiten retornos triviales, autonumber,
+' nota del tipo de dato clave validado por TypeScript, sin emoticonos.
+
+skinparam nodesep 50
+skinparam ranksep 60
+skinparam padding 10
+autonumber
+
+actor "Usuario" as U
+participant "Vista EJS" as V
+participant "Ruta Web" as R
+participant "Middleware" as M
+participant "Controlador Web" as C
+participant "Servicio" as S
+participant "Modelo" as Mo
+database "MongoDB" as DB
+
+U -> V : enviar formulario
+V -> R : POST /homes/:id/transactions
+R -> M : requireAuth / requireHomeMember
+M -> Mo : buscar hogar
+Mo -> DB : findOne
+Mo --> M : hogar y rol
+M --> R : req.home
+R -> C : create()
+C -> S : createTransaction(home, user, body)
+S -> Mo : validar cuenta y categoría
+Mo -> DB : findOne
+S -> Mo : crear transacción
+Mo -> DB : insert
+S -> Mo : evaluar presupuesto
+Mo -> DB : consultar gasto y límite
+S --> C : transacción y avisos
+C --> V : redirigir con éxito
+V --> U : listado actualizado
+
+legend bottom
+  El cuerpo se valida como TransactionInput (campos unknown)
+  y se transforma en CleanTransaction antes de persistir.
+  El monto viaja como entero en unidad mínima.
+  Se omiten retornos triviales y la respuesta intermedia de MongoDB.
+  Se condensaron retornos triviales para mejorar la legibilidad;
+  el flujo funcional es equivalente al original de 22 mensajes.
+endlegend
+
+@enduml

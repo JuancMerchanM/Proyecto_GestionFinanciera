@@ -1,0 +1,43 @@
+@startuml casos-uso-financiero
+' SUBPROMPT (sección 8.1): Casos de uso — vista "Operaciones financieras".
+' Actores: Usuario (miembro), Administrador del hogar.
+' Casos basados en el repositorio; máximo 15 casos, nombres de 1 a 3 palabras,
+' sin emoticonos, nodesep 50 y ranksep 60.
+
+skinparam nodesep 50
+skinparam ranksep 60
+skinparam padding 10
+left to right direction
+
+actor "Usuario" as User
+actor "Administrador\ndel hogar" as Admin
+User <|-- Admin
+
+rectangle "Sistema de finanzas del hogar" {
+  usecase "Gestionar cuentas" as UC1
+  usecase "Gestionar categorías" as UC2
+  usecase "Registrar ingreso" as UC3
+  usecase "Registrar gasto" as UC4
+  usecase "Definir presupuesto" as UC5
+  usecase "Definir meta" as UC6
+  usecase "Aportar a meta" as UC7
+  usecase "Consultar reportes" as UC8
+  usecase "Consultar dashboard" as UC9
+}
+
+User --> UC3
+User --> UC4
+User --> UC7
+User --> UC8
+User --> UC9
+Admin --> UC1
+Admin --> UC2
+Admin --> UC5
+Admin --> UC6
+
+legend bottom
+  La vista "Hogar y usuarios" completa los casos de sesión,
+  invitaciones y notificaciones.
+endlegend
+
+@enduml

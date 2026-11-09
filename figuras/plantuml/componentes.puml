@@ -1,0 +1,62 @@
+@startuml componentes
+' SUBPROMPT (sección 8.2): Genera un diagrama de componentes UML.
+' Contexto: sistema monolítico con organización por carpetas técnicas; nombres genéricos de módulos/capas.
+' Reglas: agrupar por capa lógica, flechas punteadas de dependencia, nota de monolito,
+' máximo 12 componentes y 15 dependencias, sin emoticonos, nodesep 50 y ranksep 60.
+
+skinparam nodesep 50
+skinparam ranksep 60
+skinparam padding 10
+skinparam componentStyle rectangle
+left to right direction
+
+package "Presentación" {
+  [Vistas EJS] as Views
+  [Frontend Cliente] as FE
+}
+
+package "Entrada" {
+  [Rutas Web] as WebRoutes
+  [Rutas API] as ApiRoutes
+  [Middlewares] as MW
+}
+
+package "Lógica de negocio" {
+  [Controladores Web] as WebCtrl
+  [Controladores API] as ApiCtrl
+  [Servicios] as Services
+}
+
+package "Acceso a datos" {
+  [Modelos] as Models
+  [Driver MongoDB] as Driver
+}
+
+package "Configuración y utilidades" {
+  [Configuración] as Config
+  [Utilidades] as Utils
+}
+
+FE --> WebRoutes : HTTP
+FE --> ApiRoutes : HTTP
+WebRoutes --> MW : valida
+ApiRoutes --> MW : valida
+WebRoutes --> WebCtrl : despacha
+ApiRoutes --> ApiCtrl : despacha
+WebCtrl --> Views : renderiza
+WebCtrl --> Services : invoca
+ApiCtrl --> Services : invoca
+MW --> Models : consulta
+Services --> Models : opera
+Models --> Driver : persiste
+Config --> Driver : conecta
+WebCtrl --> Utils : usa
+Services --> Utils : usa
+
+legend bottom
+  Todos los componentes se ejecutan en el mismo proceso (monolito).
+  La organización refleja las carpetas actuales del código,
+  no una arquitectura ideal por capas.
+endlegend
+
+@enduml

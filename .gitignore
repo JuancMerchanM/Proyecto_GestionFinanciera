@@ -8,3 +8,12 @@ all-files.txt
 run-me
 *.txt
 *.md
+
+# Binario pesado de PlantUML (22 MB); se descarga con herramientas/descargar_plantuml.sh
+herramientas/plantuml.jar
+
+# Auxiliares de LaTeX (regenerables)
+documentacion_migracion.aux
+documentacion_migracion.bbl
+documentacion_migracion.blg
+documentacion_migracion.out

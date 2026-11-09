@@ -1,0 +1,52 @@
+@startuml clases-usuarios-hogar
+' SUBPROMPT (sección 8.5): Diagrama de clases UML — vista "Usuarios y hogar".
+' Clases basadas en src/models/: Usuario, Hogar, Invitación, Notificación.
+' Relaciones con multiplicidad, máximo 10 clases, sin emoticonos,
+' classAttributeIconSize 0, nodesep 50 y ranksep 60.
+
+skinparam classAttributeIconSize 0
+skinparam nodesep 50
+skinparam ranksep 60
+skinparam padding 10
+top to bottom direction
+
+class "Usuario" as User {
+  nombre : texto
+  correo : texto
+  hashClave : texto
+  hogares : lista
+}
+
+class "Hogar" as Home {
+  nombre : texto
+  moneda : Currency
+  creadoPor : referencia
+}
+
+class "Invitación" as Invite {
+  código : texto
+  correo : texto
+  estado : InviteStatus
+  expira : fecha
+}
+
+class "Notificación" as Notification {
+  tipo : NotificationType
+  título : texto
+  mensaje : texto
+  leída : booleano
+}
+
+User "1" -- "0..*" Home : participa
+Home "1" -- "0..*" Invite : emite
+User "1" -- "0..*" Invite : crea
+User "1" -- "0..*" Notification : recibe
+Home "1" -- "0..*" Notification : agrupa
+
+legend bottom
+  Miembro es un subdocumento embebido de Hogar que asocia
+  un usuario con un rol (Role: admin o member).
+  Enumeraciones tipadas: Role, InviteStatus y NotificationType.
+endlegend
+
+@enduml

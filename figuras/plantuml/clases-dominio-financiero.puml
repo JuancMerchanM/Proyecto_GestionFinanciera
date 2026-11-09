@@ -1,0 +1,67 @@
+@startuml clases-dominio-financiero
+' SUBPROMPT (sección 8.5): Diagrama de clases UML — vista "Dominio financiero".
+' Clases basadas en src/models/: Cuenta, Transacción, Categoría, Presupuesto, Meta.
+' Atributos principales, relaciones con multiplicidad, máximo 10 clases,
+' sin emoticonos, classAttributeIconSize 0, nodesep 50 y ranksep 60.
+
+skinparam classAttributeIconSize 0
+skinparam nodesep 50
+skinparam ranksep 60
+skinparam padding 10
+top to bottom direction
+
+class "Cuenta" as Account {
+  nombre : texto
+  tipo : AccountType
+  moneda : Currency
+  saldoInicial : entero
+  archivada : booleano
+}
+
+class "Transacción" as Transaction {
+  tipo : MovementType
+  monto : entero
+  fecha : fecha
+  nota : texto
+}
+
+class "Categoría" as Category {
+  nombre : texto
+  tipo : MovementType
+  color : texto
+  porDefecto : booleano
+  archivada : booleano
+}
+
+class "Presupuesto" as Budget {
+  mes : texto
+  límite : entero
+  moneda : Currency
+}
+
+class "Meta" as Goal {
+  nombre : texto
+  objetivo : entero
+  fechaLímite : fecha
+  archivada : booleano
+}
+
+class "Aporte" as Contribution {
+  monto : entero
+  fecha : fecha
+  nota : texto
+}
+
+Account "1" -- "0..*" Transaction : registra
+Category "1" -- "0..*" Transaction : clasifica
+Category "1" -- "0..*" Budget : limita
+Goal "1" *-- "0..*" Contribution : compone
+
+legend bottom
+  Todas las entidades se delimitan por el hogar (homeId)
+  y conservan los montos como enteros en unidad mínima.
+  Enumeraciones tipadas: AccountType, MovementType y Currency.
+  Aporte es un subdocumento embebido de Meta.
+endlegend
+
+@enduml
