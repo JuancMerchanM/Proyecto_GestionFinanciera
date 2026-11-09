@@ -115,13 +115,26 @@ Fecha: 09/11/2026
   Fig. 1a/1b y Fig. 5a/5b: figure* con dos subfigure de 0.48\linewidth;
     \includegraphics[width=\linewidth] en cada subfigura.
   Fig. 2, 3 y 4: figure* con \includegraphics[width=\textwidth].
-  No se usa \resizebox ni rotación. Tamaño tipográfico efectivo aproximado
-  (alto de glifo nativo 14.3 pt escalado al ancho de inserción):
-    Fig. 1a 8.3 pt | Fig. 1b 8.3 pt | Fig. 2 6.4 pt | Fig. 3 5.7 pt
-    Fig. 4 5.0 pt  | Fig. 5a 7.3 pt | Fig. 5b 10.0 pt
+  No se usa \resizebox ni rotación.
+
+  TABLA: Tamaño tipográfico efectivo por figura
+  (alto de glifo nativo 14.3 pt escalado al ancho de inserción)
+  +--------+----------------------+------------------+
+  | Figura | Ancho de inserción   | Tamaño efectivo  |
+  +--------+----------------------+------------------+
+  | 1a     | 0.48\textwidth       | 8.3 pt           |
+  | 1b     | 0.48\textwidth       | 8.3 pt           |
+  | 2      | \textwidth           | 6.4 pt           |
+  | 3      | \textwidth           | 5.7 pt           |
+  | 4      | \textwidth           | 5.0 pt           |
+  | 5a     | 0.48\textwidth       | 7.3 pt           |
+  | 5b     | 0.48\textwidth       | 10.0 pt          |
+  +--------+----------------------+------------------+
+
   Las Fig. 3 y 4 quedan por debajo de 7 pt porque su relación de aspecto
-  (1.30:1 y 4.36:1) agota el ancho de página; para superar ese umbral habría
-  que regenerarlas con espaciado más compacto o rotarlas.
+  (1.30:1 y 4.36:1) agota el ancho de página. Se aceptó conscientemente
+  ese tamaño: son diagramas de alta densidad cuya lectura plena depende
+  del zoom en la versión digital. No se regeneran ni se rotan.
 
 3. COMPILACIÓN DEL DOCUMENTO
 ----------------------------
@@ -167,6 +180,6 @@ Fecha: 09/11/2026
 
 4. SALIDAS
 ----------
-  documentacion_migracion.pdf   (PDF final, 10 páginas con las 7 figuras)
+  documentacion_migracion.pdf   (PDF final, 11 páginas: artículo completo + anexo)
   documentacion_migracion.aux   (auxiliar, regenerable)
   documentacion_migracion.log   (registro de compilación; 0 overfull)

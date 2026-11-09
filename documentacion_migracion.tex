@@ -631,7 +631,8 @@ capas descrito en la Sección III.
 \begin{figure*}[!t]
 \centering
 \includegraphics[width=\textwidth]{figuras/pdf/secuencia-registrar-gasto.pdf}
-\caption{Secuencia de registro de un gasto}
+\caption{Secuencia de registro de un gasto. En la versión digital se recomienda
+ampliar la figura para leer las etiquetas.}
 \label{fig:secuencia}
 \end{figure*}
 
@@ -641,7 +642,8 @@ la validación de sesión y hogar ocurre antes de invocar al controlador, que el
 servicio concentra la creación y la evaluación del presupuesto, y que la
 respuesta al usuario no espera a que la notificación se consulte. La secuencia
 condensa retornos triviales para mejorar la legibilidad; el flujo funcional es
-equivalente al original de 22 mensajes.
+equivalente al original de 22 mensajes. Para leer las etiquetas en detalle, se
+recomienda ampliar la Fig.~\ref{fig:secuencia} en la versión digital.
 
 
 \subsection{Diagrama de colaboración}
@@ -649,7 +651,8 @@ equivalente al original de 22 mensajes.
 \begin{figure*}[!t]
 \centering
 \includegraphics[width=\textwidth]{figuras/pdf/colaboracion-registrar-gasto.pdf}
-\caption{Colaboración de objetos en el registro de un gasto}
+\caption{Colaboración de objetos en el registro de un gasto. En la versión
+digital se recomienda ampliar la figura para leer las etiquetas.}
 \label{fig:colaboracion}
 \end{figure*}
 
@@ -658,7 +661,8 @@ objetos enlazados por mensajes numerados. La Fig.~\ref{fig:colaboracion}
 evidencia el anidamiento de las llamadas: el mensaje 3.1.2.1 representa la
 persistencia en MongoDB y cubre tanto las consultas como las escrituras que el
 modelo resuelve. Los ocho objetos incluyen la base de datos, de modo que la
-colaboración no oculta el extremo de persistencia.
+colaboración no oculta el extremo de persistencia. La lectura de las etiquetas
+se facilita ampliando la Fig.~\ref{fig:colaboracion} en la versión digital.
 
 
 \subsection{Diagramas de clases}
@@ -703,10 +707,135 @@ enumeraciones de rol, estado de invitación y tipo de notificación restringen
 los valores válidos sin cambiar los datos almacenados.
 
 \section{Resultados, validación y lecciones aprendidas}
-% TODO (Bloque c): resultados, doble alcance temporal y lecciones.
+
+\subsection{Resultados de la migración}
+
+Al cierre de la migración, el compilador dejó de emitir diagnósticos sobre el
+árbol completo y las suites HTTP quedaron sin fallos. La Tabla~\ref{tab:migracion}
+reúne únicamente las cifras de ese momento; no incorpora el conteo de
+comprobaciones del estado actual, que se discute en la
+Sección~\ref{sec:doble-alcance}. El descenso de 686 a 0 errores de
+\texttt{tsc --noEmit} se produjo por capas y sin cambios de comportamiento
+observable, y las 204 comprobaciones funcionales se mantuvieron en verde tras
+cada cierre de capa.
+
+\begin{table}[!t]
+\caption{Resultados al cierre de la migración (commit \texttt{34016bd})}
+\label{tab:migracion}
+\centering
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Indicador & Antes & Después \\
+\midrule
+Errores de \texttt{tsc --noEmit} & 686 & 0 \\
+Comprobaciones HTTP exitosas & --- & 204/204 \\
+Archivos \texttt{.mjs} en \texttt{src/} & 53 & 0 \\
+Referencias a \texttt{.mjs} en el código & 106 & 0 \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+{\footnotesize Fuente: suites HTTP ejecutadas sobre el commit \texttt{34016bd}
+(05/11/2026) y \texttt{npm run typecheck} sobre el mismo commit.}
+\end{table}
+
+\subsection{Validación funcional}
+
+La validación combinó dos niveles. El primero fue estático: \texttt{npm run
+typecheck} ejecuta \texttt{tsc --noEmit} sobre \texttt{src/} y exige cero
+diagnósticos. El segundo fue funcional: las suites de HTTP se ejecutaron contra
+el servidor iniciado con \texttt{tsx} y la base MongoDB activa. La suite de
+estado base preparó usuarios, hogares y sesiones; las suites de transacciones,
+presupuestos y permisos, reportes y recursos, y autenticación e interfaz de
+programación aportaron 52, 62, 49 y 41 comprobaciones, respectivamente, hasta
+sumar 204.
+
+A ello se añadieron comprobaciones puntuales: el documento OpenAPI respondió
+con el HTML de Swagger y su archivo de inicialización; las rutas
+\texttt{/js/app.js} y \texttt{/js/dashboard.js} sirvieron los paquetes
+generados; y el mensaje de sesión se conservó con una sola aparición. La
+ausencia de residuos se verificó con dos búsquedas: ninguna extensión
+\texttt{.mjs} permaneció bajo \texttt{src/} y ninguna referencia a esa extensión
+sobrevivió en \texttt{src/} o \texttt{public/}. Las suites son scripts de shell
+alojados en \texttt{.data/tests}; no forman parte de los scripts de
+\texttt{package.json} y requieren MongoDB y el servidor en ejecución, por lo que
+su reproducción completa depende de ese entorno.
+
+\subsection{Evidencia de snapshots}
+
+La comparación se apoya en ocho pares de archivos reconstruidos desde el
+historial: el punto de entrada, el modelo de usuario, el modelo de invitación,
+el servicio de cuentas, el middleware de hogar, el controlador de cuentas de la
+interfaz de programación, el controlador web de autenticación y la fuente del
+frontend. El par de \texttt{src/models/user.ts}, reproducido en el
+Listado~\ref{lst:modelo}, es representativo: muestra la interfaz del documento,
+la interfaz del contrato y la clase cuyos estáticos se copian con
+\texttt{loadClass}. El detalle de los ocho pares y los comandos de comparación
+se conserva en el Anexo A.2.
+
+\subsection{Doble alcance temporal}
+\label{sec:doble-alcance}
+
+Este artículo distingue dos momentos: el proceso migratorio (cifras 686 a 0 y
+204/204, commit \texttt{34016bd}) y el estado actual del repositorio (67
+archivos \texttt{.ts}, 577/577 checks en \texttt{cebc62a}). Las cifras actuales
+no se contabilizan como resultados de la migración porque corresponden a las
+fases A--E posteriores. La distinción es una decisión metodológica: evita
+atribuir al proceso migratorio funciones y pruebas que se incorporaron después
+de su cierre y permite comparar ambos momentos sin mezclar sus fuentes.
+
+\subsection{Despliegue}
+
+El despliegue en Vercel no ejecuta un paso de compilación: el servidor se inicia
+con \texttt{tsx} y el sitio sirve los artefactos ya publicados en
+\texttt{public/}. Esa configuración mantiene el typecheck como una verificación
+previa y no como un requisito del arranque. La lección de despliegue fue la
+resolución de tipos: Vercel instala dependencias con un anidamiento distinto al
+local, por lo que \texttt{tsconfig.json} declara \texttt{typeRoots} con las rutas
+\texttt{./node\_modules/@types}, \texttt{../node\_modules/@types} y
+\texttt{../../node\_modules/@types}. Sin esa declaración, el paquete de tipos de
+Node.js no se encontraba en el entorno de ejecución remoto.
+
+\subsection{Lecciones aprendidas}
+
+Tres lecciones resumen el proceso. Primera: en Mongoose, extender una clase
+desde \texttt{Model} no aporta tipado porque \texttt{Model} es una interfaz; el
+contrato debe declararse como interfaz y los estáticos implementarse en una
+clase copiada con \texttt{loadClass}. Segunda: activar \texttt{strict} de forma
+incremental por capas convierte el conteo de errores en una señal de avance y
+evita mezclar deuda localizada con ruido cruzado. Tercera: separar el typecheck
+del build permite verificar el árbol sin generar artefactos y conserva un
+despliegue sin paso de compilación.
 
 \section{Conclusiones}
-% TODO (Bloque c): síntesis, cumplimiento de objetivos y trabajo futuro.
+
+\subsection{Síntesis técnica}
+
+La migración transformó un monolito JavaScript ESM en un árbol TypeScript
+estricto sin reescribir la aplicación. El renombrado mecánico, la configuración
+del compilador, el orden por capas y la formalización de los modelos permitieron
+llegar a cero diagnósticos y mantener 204 comprobaciones funcionales. El patrón
+de interfaz de documento, interfaz de modelo y clase de estáticos resolvió el
+caso de Mongoose y se generalizó a los nueve modelos actuales.
+
+\subsection{Cumplimiento de objetivos}
+
+Los objetivos se cumplieron con evidencia reproducible: el typecheck desciende
+de 686 a 0, las suites cierran en 204/204 y cada par de snapshots queda anclado
+a un commit. El valor académico no reside solo en el resultado, sino en el
+protocolo: cualquier lector puede repetir el typecheck, ejecutar las suites en
+un entorno equivalente y comparar los archivos representativos entre
+\texttt{fb1ad1d} y \texttt{34016bd}. La documentación de las decisiones y de las
+alternativas descartadas completa esa trazabilidad.
+
+\subsection{Trabajo futuro}
+
+Quedan tres líneas abiertas: incorporar pruebas unitarias sobre servicios y
+modelos, añadir una integración continua que ejecute el typecheck en cada
+cambio, y versionar el contrato OpenAPI junto con el código para detectar
+divergencias entre la documentación y los manejadores. Ninguna de esas líneas
+modifica las conclusiones de este artículo.
 
 % Vacía la cola de flotantes antes de la bibliografía.
 \clearpage
@@ -716,9 +845,89 @@ los valores válidos sin cambiar los datos almacenados.
 \bibliographystyle{IEEEtran}
 \bibliography{referencias}
 
-% TODO (Bloque c): Anexo A.1 (decisiones descartadas) y A.2 (snapshots).
-% En A.2 incluir el comando de reproducibilidad del parche de fuentes:
-%   sed -i '495s/{ptm}/{cmr}/' texmf/tex/latex/ieeetran/IEEEtran.cls
-%   sed -i '4595s/{ptm}/{cmr}/' texmf/tex/latex/ieeetran/IEEEtran.cls
+\section*{Anexo A}
+\addcontentsline{toc}{section}{Anexo A}
+
+\subsection*{A.1 Decisiones y alternativas descartadas}
+
+La Tabla~\ref{tab:alternativas} resume las cinco alternativas evaluadas durante
+la migración. Todas fueron descartadas por un motivo verificable y sustituidas
+por la opción que quedó en el repositorio.
+
+\begin{table}[!t]
+\caption{Alternativas descartadas durante la migración}
+\label{tab:alternativas}
+\centering
+\footnotesize
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.55cm}>{\raggedright\arraybackslash}p{1.75cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.1cm}@{}}
+\toprule
+Alternativa & Motivo de descarte & Opción adoptada & Evidencia \\
+\midrule
+\texttt{class XModel extends Model} & \texttt{Model} es interfaz; colapsa miembros a \texttt{any} & \texttt{IXModel} + clase con \texttt{loadClass} & \texttt{models/\allowbreak user.ts} \\
+\texttt{tsc} + ejecución de \texttt{dist/} & Añade build al despliegue; Vercel no lo ejecuta & \texttt{tsx} en runtime + \texttt{tsc --noEmit} & \texttt{package.json} \\
+\texttt{catch (err: any)} & Anula el chequeo estricto del error & \texttt{unknown} + \texttt{isHttpError} & \texttt{middlewares/\allowbreak error.ts} \\
+Guardia de hogar por ruta & Duplica control y altera flujos de error & Aserción no nula tras el middleware & \texttt{types/\allowbreak express.d.ts} \\
+Frontend sin migrar & Mantiene dos lenguajes y contratos distintos & TypeScript + esbuild con artefactos versionados & \texttt{package.json} (\texttt{build:ui}) \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+{\footnotesize Fuente: repositorio en el commit \texttt{34016bd} (05/11/2026)
+y sección 11 del documento de migración.}
+\end{table}
+
+\subsection*{A.2 Trazabilidad de snapshots}
+
+Los archivos de \texttt{antes/} provienen del commit \texttt{fb1ad1d}, estado
+previo a la migración. Los de \texttt{despues/} provienen del commit
+\texttt{34016bd} (``Migración completa a TypeScript estricto''), que cierra la
+migración, y no de \texttt{HEAD}. El estado actual del repositorio puede
+diferir de estos snapshots por las fases posteriores A--E. La
+Tabla~\ref{tab:snapshots} enumera los ocho pares reconstruidos.
+
+\begin{table}[!t]
+\caption{Pares de snapshots reconstruidos entre \texttt{fb1ad1d} y \texttt{34016bd}}
+\label{tab:snapshots}
+\centering
+\footnotesize
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{3.8cm}@{}}
+\toprule
+Par (antes $\rightarrow$ después) & Aspecto diferencial \\
+\midrule
+\texttt{app.mjs} $\rightarrow$ \texttt{app.ts} & Punto de entrada, locales y doble arranque \\
+\texttt{models/user.mjs} $\rightarrow$ \texttt{models/user.ts} & Interfaz, clase y estáticos \\
+\texttt{models/invite.mjs} $\rightarrow$ \texttt{models/invite.ts} & Enumeraciones tipadas \\
+\texttt{accountService.mjs} $\rightarrow$ \texttt{.ts} & Entradas tipadas y errores \\
+\texttt{middlewares/home.mjs} $\rightarrow$ \texttt{home.ts} & Augmentación de la petición \\
+\texttt{api/accountController.mjs} $\rightarrow$ \texttt{.ts} & Manejadores tipados \\
+\texttt{web/authController.mjs} $\rightarrow$ \texttt{.ts} & Cuerpos y flujos web \\
+\texttt{public/js/app.js} $\rightarrow$ \texttt{src/frontend/app.ts} & DOM tipado y bundle \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+{\footnotesize Fuente: \texttt{INDICE.md} de la carpeta de snapshots; commit de origen
+\texttt{fb1ad1d} y commit de destino \texttt{34016bd} (05/11/2026).}
+\end{table}
+
+La comparación de un par se reproduce desde el directorio
+\texttt{snapshots-migracion/} con los comandos siguientes:
+
+{\ttfamily\scriptsize
+\noindent\verb|diff -u antes/src/models/user.mjs despues/src/models/user.ts|\\
+\noindent\verb|diff -u antes/src/app.mjs despues/src/app.ts|
+\par}
+
+Los Listados 1 y 3 no forman parte de los ocho snapshots: \texttt{tsconfig.json}
+y \texttt{src/types/express.d.ts} se citan directamente desde el commit
+\texttt{34016bd}, como se indica en sus notas al pie. Para reproducir el parche
+de fuentes de la plantilla IEEEtran, el comando exacto es:
+
+{\ttfamily\scriptsize
+\noindent\verb|sed -i '495s/{ptm}/{cmr}/' \|\\
+\noindent\verb|  texmf/tex/latex/ieeetran/IEEEtran.cls|\\
+\noindent\verb|sed -i '4595s/{ptm}/{cmr}/' \|\\
+\noindent\verb|  texmf/tex/latex/ieeetran/IEEEtran.cls|
+\par}
 
 \end{document}
