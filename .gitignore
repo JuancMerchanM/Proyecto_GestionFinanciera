@@ -30,6 +30,15 @@ snapshots-migracion/
 # Entregable separado (se envía por otro canal)
 /url_repositorio.txt
 
+# Fuentes de la documentación (se conservan en disco, no se publican)
+/documentacion_migracion.tex
+/figuras/
+/texmf/
+/referencias.bib
+/README_compilacion.txt
+/herramientas/
+# documentacion_migracion.pdf sí se publica: no se ignora
+
 # Binarios vendorizados que no se versionan
 /herramientas/plantuml.jar
 
