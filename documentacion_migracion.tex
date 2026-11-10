@@ -88,8 +88,7 @@ devolvían estructuras verificadas únicamente en tiempo de ejecución y
 cualquier refactorización exigía recorrer manualmente los puntos de uso. El
 problema documentado no fue un fallo funcional, sino un costo estructural de
 mantenimiento y una barrera para demostrar corrección.\footnote{La plantilla
-IEEEtran fue adaptada localmente para usar Computer Modern; consúltese
-\texttt{README\_compilacion.txt}.}
+IEEEtran fue adaptada localmente para usar Computer Modern en lugar de Times.}
 
 \subsection{Objetivo y alcance}
 El objetivo es documentar, con evidencia verificable, la migración de ese
@@ -184,8 +183,8 @@ de 686 defectos funcionales, sino del total de diagnósticos emitidos por el
 compilador al activar la verificación estricta sobre los archivos que antes se
 ejecutaban como JavaScript. Ese valor operó como línea base y como criterio de
 avance: cada capa se consideraba terminada cuando reducía el conteo sin
-introducir cambios de comportamiento. El detalle del estado inicial se
-conserva en el snapshot del commit \texttt{fb1ad1d} (Anexo A.2).
+introducir cambios de comportamiento. El estado inicial corresponde al commit
+\texttt{fb1ad1d} (Anexo A.2).
 
 \section{Metodología y proceso de migración}
 
@@ -208,9 +207,9 @@ extensión \texttt{.mjs} permanecía en \texttt{src/} y ninguna referencia a
 \texttt{.mjs} sobrevivía en el código.
 
 \subsection{Configuración del compilador}
-La configuración adoptada se reproduce en el Listado~\ref{lst:tsconfig}.\footnote{Archivo
-no incluido en los ocho snapshots de A.2; se cita desde el commit
-\texttt{34016bd}.} Su propósito es demostrar que la verificación estricta se
+La configuración adoptada se reproduce en el Listado~\ref{lst:tsconfig}.\footnote{El
+fragmento se reproduce del estado del archivo en el commit \texttt{34016bd}.}
+Su propósito es demostrar que la verificación estricta se
 aplicó a todo el árbol,
 incluido el frontend, y que el compilador se usó sin emitir archivos.
 
@@ -242,7 +241,8 @@ imports que solo aportan tipos; y \texttt{allowImportingTsExtensions} permite
 que los imports internos lleven la extensión \texttt{.ts}, coherente con el
 modo ESM y con \texttt{tsx}. La opción \texttt{lib} incluye el DOM porque las
 fuentes del frontend viven bajo \texttt{src/} y se validan en la misma
-ejecución. La configuración completa se conserva en el commit \texttt{34016bd}; no forma parte de los ocho archivos representativos del Anexo A.2.
+ejecución. La configuración completa corresponde al estado del archivo en el
+commit \texttt{34016bd}.
 
 \subsection{Orden de migración por capas}
 La migración avanzó de abajo hacia arriba, con el compilador como puerta de
@@ -285,13 +285,14 @@ El patrón se aplicó a siete modelos y se acompañó de enumeraciones con valor
 idénticos a los almacenados, de modo que la validación de los esquemas no
 cambiara. Los estáticos de dominio, como la búsqueda por correo o la
 verificación de pertenencia al hogar, quedaron expuestos en el contrato y los
-servicios los consumieron en lugar de construir filtros manuales. La versión completa de \texttt{src/models/user.ts} se conserva en el snapshot del Anexo A.2.
+servicios los consumieron en lugar de construir filtros manuales. El fragmento
+se reproduce del estado del archivo en el commit \texttt{34016bd}.
 
 \subsection{Contratos de petición y augmentación de Express}
 Las propiedades que los middlewares inyectan en la petición se declararon
 mediante augmentación de tipos, como muestra el
-Listado~\ref{lst:express}.\footnote{Archivo no incluido en los ocho snapshots
-de A.2; se cita desde el commit \texttt{34016bd}.} Esto convierte el acceso a
+Listado~\ref{lst:express}.\footnote{El fragmento se reproduce del estado del
+archivo en el commit \texttt{34016bd}.} Esto convierte el acceso a
 \texttt{req.home} o \texttt{req.user} en una operación verificada y obliga a
 resolver la posibilidad de que no existan.
 
@@ -312,7 +313,8 @@ declare global {
 En las rutas protegidas, los middlewares garantizan la presencia de esas
 propiedades; por eso se empleó la aserción de no nulidad en lugar de añadir
 guardas que habrían alterado los flujos de error. La aserción es una operación
-de tipo y no modifica el valor en tiempo de ejecución. La declaración completa se conserva en el commit \texttt{34016bd}; su uso se evidencia en el snapshot de \texttt{src/middlewares/home.ts} del Anexo A.2.
+de tipo y no modifica el valor en tiempo de ejecución. La declaración completa
+corresponde al commit \texttt{34016bd}; su uso se describe en el Anexo A.2.
 
 \subsection{Errores y conversiones de tipo}
 El compilador tipa el parámetro de \texttt{catch} como \texttt{unknown}. Para
@@ -369,29 +371,20 @@ Además del conteo, se comprobaron regresiones puntuales: la documentación
 OpenAPI respondió con el documento generado y sus recursos, las rutas de
 archivos estáticos sirvieron los bundles del frontend y los mensajes de sesión
 se conservaron. El criterio de cierre fue doble: compilador sin errores y
-suites sin fallos. La fuente de la Tabla~\ref{tab:verificacion} es la sección 9
-del documento de migración incluido en el commit \texttt{34016bd}.
+suites sin fallos. Esos dos conjuntos de comprobaciones, ejecutados sobre el
+commit \texttt{34016bd}, son la fuente de la Tabla~\ref{tab:verificacion}.
 
 \subsection{Decisiones y alternativas descartadas}
 Las alternativas evaluadas y su motivo de descarte se resumen en el Anexo A.1;
 ninguna de ellas forma parte del flujo final.
 
 \subsection{Trazabilidad de snapshots}
-El índice de snapshots deja constancia del criterio de comparación, que se cita
-textualmente:
-
-\begin{quote}
-\itshape
-Los archivos de \texttt{antes/} provienen del commit \texttt{fb1ad1d}, estado
-previo a la migración. Los de \texttt{despues/} provienen del commit
-\texttt{34016bd} (``Migración completa a TypeScript estricto''), que cierra la
-migración, y no de \texttt{HEAD}. El estado actual del repositorio puede
-diferir de estos snapshots por las fases posteriores A--E.
-\end{quote}
-
-De acuerdo con esa nota, el estado actual del repositorio puede diferir por las
-fases A--E posteriores; este artículo no las documenta como parte del proceso
-migratorio. La comparación entre ambos commits se reproduce en el Anexo A.2.
+Los snapshots se extrajeron de dos commits: \texttt{fb1ad1d}, que fija el estado
+previo a la migración, y \texttt{34016bd} (``Migración completa a TypeScript
+estricto''), que cierra la migración. El estado actual del árbol puede diferir
+de esos snapshots por las fases posteriores A--E, que este artículo no
+documenta como parte del proceso migratorio. La comparación entre ambos commits
+se resume en el Anexo A.2.
 
 \section{Arquitectura y diseño del sistema migrado}
 
@@ -768,11 +761,12 @@ La comparación se apoya en ocho pares de archivos reconstruidos desde el
 historial: el punto de entrada, el modelo de usuario, el modelo de invitación,
 el servicio de cuentas, el middleware de hogar, el controlador de cuentas de la
 interfaz de programación, el controlador web de autenticación y la fuente del
-frontend. El par de \texttt{src/models/user.ts}, reproducido en el
+frontend. El par del modelo de usuario, reproducido en el
 Listado~\ref{lst:modelo}, es representativo: muestra la interfaz del documento,
 la interfaz del contrato y la clase cuyos estáticos se copian con
-\texttt{loadClass}. El detalle de los ocho pares y los comandos de comparación
-se conserva en el Anexo A.2.
+\texttt{loadClass}. En conjunto, los ocho pares muestran que la migración
+conservó la estructura de cada archivo y añadió tipos en los contratos, los
+parámetros y los retornos, sin alterar los flujos.
 
 \subsection{Doble alcance temporal}
 \label{sec:doble-alcance}
@@ -872,62 +866,47 @@ Frontend sin migrar & Mantiene dos lenguajes y contratos distintos & TypeScript 
 \end{tabular}
 
 \vspace{2pt}
-{\footnotesize Fuente: repositorio en el commit \texttt{34016bd} (05/11/2026)
-y sección 11 del documento de migración.}
+{\footnotesize Fuente: repositorio en el commit \texttt{34016bd} (05/11/2026).}
 \end{table}
 
 \subsection*{A.2 Trazabilidad de snapshots}
 
-Los archivos de \texttt{antes/} provienen del commit \texttt{fb1ad1d}, estado
-previo a la migración. Los de \texttt{despues/} provienen del commit
-\texttt{34016bd} (``Migración completa a TypeScript estricto''), que cierra la
-migración, y no de \texttt{HEAD}. El estado actual del repositorio puede
-diferir de estos snapshots por las fases posteriores A--E. La
-Tabla~\ref{tab:snapshots} enumera los ocho pares reconstruidos.
+Los ocho pares documentados en la Tabla~\ref{tab:snapshots} se utilizaron como
+evidencia del efecto de la migración; los commits indican el estado previo y el
+cierre de la migración. El estado actual del árbol puede diferir por las fases
+A--E posteriores.
 
 \begin{table}[!t]
-\caption{Pares de snapshots reconstruidos entre \texttt{fb1ad1d} y \texttt{34016bd}}
+\caption{Pares de archivos comparados entre el estado previo y el cierre de la migración}
 \label{tab:snapshots}
 \centering
-\footnotesize
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{3.8cm}@{}}
+\scriptsize
+\setlength{\tabcolsep}{1.5pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.25cm}>{\raggedright\arraybackslash}p{2.55cm}>{\raggedright\arraybackslash}p{2.55cm}>{\raggedright\arraybackslash}p{1.05cm}>{\raggedright\arraybackslash}p{1.05cm}@{}}
 \toprule
-Par (antes $\rightarrow$ después) & Aspecto diferencial \\
+Par & Archivo antes & Archivo después & Commit antes & Commit después \\
 \midrule
-\texttt{app.mjs} $\rightarrow$ \texttt{app.ts} & Punto de entrada, locales y doble arranque \\
-\texttt{models/user.mjs} $\rightarrow$ \texttt{models/user.ts} & Interfaz, clase y estáticos \\
-\texttt{models/invite.mjs} $\rightarrow$ \texttt{models/invite.ts} & Enumeraciones tipadas \\
-\texttt{accountService.mjs} $\rightarrow$ \texttt{.ts} & Entradas tipadas y errores \\
-\texttt{middlewares/home.mjs} $\rightarrow$ \texttt{home.ts} & Augmentación de la petición \\
-\texttt{api/accountController.mjs} $\rightarrow$ \texttt{.ts} & Manejadores tipados \\
-\texttt{web/authController.mjs} $\rightarrow$ \texttt{.ts} & Cuerpos y flujos web \\
-\texttt{public/js/app.js} $\rightarrow$ \texttt{src/frontend/app.ts} & DOM tipado y bundle \\
+Entrada & \texttt{app.mjs} & \texttt{app.ts} & \texttt{fb1ad1d} & \texttt{34016bd} \\
+Usuario & \texttt{user.mjs} & \texttt{user.ts} & \texttt{fb1ad1d} & \texttt{34016bd} \\
+Invitación & \texttt{invite.mjs} & \texttt{invite.ts} & \texttt{fb1ad1d} & \texttt{34016bd} \\
+Cuentas & \texttt{accountService.mjs} & \texttt{accountService.ts} & \texttt{fb1ad1d} & \texttt{34016bd} \\
+Hogar & \texttt{home.mjs} & \texttt{home.ts} & \texttt{fb1ad1d} & \texttt{34016bd} \\
+API cuentas & \texttt{accountController}\allowbreak\texttt{.mjs} & \texttt{accountController}\allowbreak\texttt{.ts} & \texttt{fb1ad1d} & \texttt{34016bd} \\
+Web auth & \texttt{authController}\allowbreak\texttt{.mjs} & \texttt{authController}\allowbreak\texttt{.ts} & \texttt{fb1ad1d} & \texttt{34016bd} \\
+Frontend & \texttt{public/js/}\allowbreak\texttt{app.js} & \texttt{src/frontend/}\allowbreak\texttt{app.ts} & \texttt{fb1ad1d} & \texttt{34016bd} \\
 \bottomrule
 \end{tabular}
 
 \vspace{2pt}
-{\footnotesize Fuente: \texttt{INDICE.md} de la carpeta de snapshots; commit de origen
-\texttt{fb1ad1d} y commit de destino \texttt{34016bd} (05/11/2026).}
+{\footnotesize Fuente: historial del proyecto; \texttt{fb1ad1d} identifica el
+estado previo y \texttt{34016bd} el cierre de la migración (05/11/2026).}
 \end{table}
 
-La comparación de un par se reproduce desde el directorio
-\texttt{snapshots-migracion/} con los comandos siguientes:
-
-{\ttfamily\scriptsize
-\noindent\verb|diff -u antes/src/models/user.mjs despues/src/models/user.ts|\\
-\noindent\verb|diff -u antes/src/app.mjs despues/src/app.ts|
-\par}
-
-Los Listados 1 y 3 no forman parte de los ocho snapshots: \texttt{tsconfig.json}
-y \texttt{src/types/express.d.ts} se citan directamente desde el commit
-\texttt{34016bd}, como se indica en sus notas al pie. Para reproducir el parche
-de fuentes de la plantilla IEEEtran, el comando exacto es:
-
-{\ttfamily\scriptsize
-\noindent\verb|sed -i '495s/{ptm}/{cmr}/' \|\\
-\noindent\verb|  texmf/tex/latex/ieeetran/IEEEtran.cls|\\
-\noindent\verb|sed -i '4595s/{ptm}/{cmr}/' \|\\
-\noindent\verb|  texmf/tex/latex/ieeetran/IEEEtran.cls|
-\par}
+Los ocho pares abarcan la entrada, el dominio, los servicios, los controladores
+y el frontend, de modo que la evidencia no se limita a un módulo aislado. En
+todos los casos se conservaron las rutas y los flujos, y los cambios se
+concentraron en las firmas, los contratos y las anotaciones de tipo. Esa
+continuidad permite atribuir el resultado al proceso migratorio y no a una
+reescritura.
 
 \end{document}
