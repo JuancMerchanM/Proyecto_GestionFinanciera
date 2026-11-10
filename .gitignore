@@ -1,19 +1,43 @@
+# Dependencias
 node_modules/
+
+# Entorno
 .env
-*.log
-.DS_Store
+
+# Datos locales y material de apoyo
 .data/
 snapshots-migracion/
-all-files.txt
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.lof
+*.lot
+
+# Documentos obsoletos (fases previas)
+/CasosUso.pdf
+/Diagrama_Clases.png
+/Diagrama_Componentes.png
+/Diagrama_Despliegue.png
+
+# Entregable separado (se envía por otro canal)
+/url_repositorio.txt
+
+# Binarios vendorizados que no se versionan
+/herramientas/plantuml.jar
+
+# Temporales y notas de trabajo
+/all-files.txt
 run-me
 *.txt
 *.md
 
-# Binario pesado de PlantUML (22 MB); se descarga con herramientas/descargar_plantuml.sh
-herramientas/plantuml.jar
-
-# Auxiliares de LaTeX (regenerables)
-documentacion_migracion.aux
-documentacion_migracion.bbl
-documentacion_migracion.blg
-documentacion_migracion.out
+# Sistema
+.DS_Store
