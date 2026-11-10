@@ -1,8 +1,1 @@
-Repositorio del proyecto
-=======================
-
-URL:   https://github.com/JuancMerchanM/Proyecto_GestionFinanciera
-Remoto SSH: git@github-uni2:JuancMerchanM/Proyecto_GestionFinanciera.git
-
-Commit de cierre de la migración: 34016bd (05/11/2026)
-Commit del estado actual descrito: cebc62a (08/11/2026)
+https://github.com/JuancMerchanM/Proyecto_GestionFinanciera
